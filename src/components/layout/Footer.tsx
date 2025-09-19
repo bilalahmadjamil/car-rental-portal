@@ -2,7 +2,7 @@
 'use client';
 
 import { motion } from 'framer-motion';
-import { MapPin, Phone, Mail, Clock, Facebook, Twitter, Instagram, Linkedin, Heart, ArrowUp } from 'lucide-react';
+import { MapPin, Phone, Mail, Clock, Facebook, Twitter, Instagram, Linkedin, Heart } from 'lucide-react';
 
 const Footer = () => {
   const currentYear = new Date().getFullYear();

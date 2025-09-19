@@ -6,7 +6,7 @@ import { Car, Calendar, Wrench, Headphones, ArrowRight, CheckCircle, Star } from
 import { services } from '@/data/mockData';
 import { designSystem, getSectionStyling } from '@/utils/designSystem';
 
-const ServiceCard = ({ service, index }: { service: any; index: number }) => {
+const ServiceCard = ({ service, index }: { service: { id: string; title: string; description: string; icon: string; features: string[] }; index: number }) => {
   const { cardVariants } = designSystem.animations;
 
   const featureVariants = {

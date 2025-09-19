@@ -6,10 +6,18 @@ export interface Vehicle {
   year: number;
   color: string;
   mileage: number;
-  pricePerDay: number;
+  fuelType: 'Petrol' | 'Diesel' | 'Electric' | 'Hybrid';
+  transmission: 'Manual' | 'Automatic';
+  seats: number;
   pricePerWeek: number;
+  pricePerDay: number;
+  status: 'available' | 'rented' | 'maintenance' | 'sold';
+  images: string[];
   features: string[];
-  image?: string;
+  location: string;
+  registration: string;
+  insuranceExcess: number;
+  deposit: number;
 }
 
 export interface ContactFormData {
@@ -62,9 +70,18 @@ export const vehicles: Vehicle[] = [
     year: 2023,
     color: 'Pearl White',
     mileage: 15000,
+    fuelType: 'Electric',
+    transmission: 'Automatic',
+    seats: 5,
     pricePerDay: 120,
     pricePerWeek: 750,
-    features: ['Autopilot', 'Premium Sound', 'Glass Roof', 'Supercharging']
+    status: 'available',
+    images: ['/images/tesla-model-3.jpg'],
+    features: ['Autopilot', 'Premium Sound', 'Glass Roof', 'Supercharging'],
+    location: 'Sydney, NSW',
+    registration: 'ABC123',
+    insuranceExcess: 2000,
+    deposit: 500
   },
   {
     id: '2',
@@ -73,9 +90,18 @@ export const vehicles: Vehicle[] = [
     year: 2022,
     color: 'Silver',
     mileage: 25000,
+    fuelType: 'Petrol',
+    transmission: 'Automatic',
+    seats: 5,
     pricePerDay: 80,
     pricePerWeek: 500,
-    features: ['Bluetooth', 'Backup Camera', 'Cruise Control', 'Keyless Entry']
+    status: 'available',
+    images: ['/images/toyota-camry.jpg'],
+    features: ['Bluetooth', 'Backup Camera', 'Cruise Control', 'Keyless Entry'],
+    location: 'Melbourne, VIC',
+    registration: 'DEF456',
+    insuranceExcess: 1500,
+    deposit: 300
   },
   {
     id: '3',
@@ -84,9 +110,18 @@ export const vehicles: Vehicle[] = [
     year: 2023,
     color: 'Black',
     mileage: 12000,
+    fuelType: 'Petrol',
+    transmission: 'Automatic',
+    seats: 7,
     pricePerDay: 90,
     pricePerWeek: 550,
-    features: ['AWD', '7 Seats', 'Touchscreen', 'Parking Sensors']
+    status: 'available',
+    images: ['/images/mitsubishi-outlander.jpg'],
+    features: ['AWD', '7 Seats', 'Touchscreen', 'Parking Sensors'],
+    location: 'Brisbane, QLD',
+    registration: 'GHI789',
+    insuranceExcess: 1800,
+    deposit: 400
   },
   {
     id: '4',
@@ -95,9 +130,18 @@ export const vehicles: Vehicle[] = [
     year: 2023,
     color: 'Midnight Silver',
     mileage: 8000,
+    fuelType: 'Electric',
+    transmission: 'Automatic',
+    seats: 7,
     pricePerDay: 140,
     pricePerWeek: 850,
-    features: ['Autopilot', 'Premium Sound', 'Glass Roof', 'Supercharging']
+    status: 'available',
+    images: ['/images/tesla-model-y.jpg'],
+    features: ['Autopilot', 'Premium Sound', 'Glass Roof', 'Supercharging'],
+    location: 'Perth, WA',
+    registration: 'JKL012',
+    insuranceExcess: 2500,
+    deposit: 600
   },
   {
     id: '5',
@@ -106,9 +150,18 @@ export const vehicles: Vehicle[] = [
     year: 2022,
     color: 'Blue',
     mileage: 18000,
+    fuelType: 'Petrol',
+    transmission: 'Automatic',
+    seats: 5,
     pricePerDay: 95,
     pricePerWeek: 580,
-    features: ['AWD', 'Bluetooth', 'Backup Camera', 'Cruise Control']
+    status: 'available',
+    images: ['/images/toyota-rav4.jpg'],
+    features: ['AWD', 'Bluetooth', 'Backup Camera', 'Cruise Control'],
+    location: 'Adelaide, SA',
+    registration: 'MNO345',
+    insuranceExcess: 1600,
+    deposit: 350
   },
   {
     id: '6',
@@ -117,9 +170,18 @@ export const vehicles: Vehicle[] = [
     year: 2023,
     color: 'Red',
     mileage: 10000,
+    fuelType: 'Petrol',
+    transmission: 'Automatic',
+    seats: 5,
     pricePerDay: 85,
     pricePerWeek: 520,
-    features: ['AWD', 'Touchscreen', 'Parking Sensors', 'Keyless Entry']
+    status: 'available',
+    images: ['/images/mitsubishi-eclipse.jpg'],
+    features: ['AWD', 'Touchscreen', 'Parking Sensors', 'Keyless Entry'],
+    location: 'Hobart, TAS',
+    registration: 'PQR678',
+    insuranceExcess: 1400,
+    deposit: 300
   }
 ];
 
@@ -132,9 +194,18 @@ export const vehiclesForSale: Vehicle[] = [
     year: 2022,
     color: 'Alpine White',
     mileage: 22000,
+    fuelType: 'Petrol',
+    transmission: 'Automatic',
+    seats: 5,
     pricePerDay: 0, // Not applicable for sales
     pricePerWeek: 0, // Not applicable for sales
-    features: ['Leather Seats', 'Navigation', 'Sunroof', 'Premium Sound']
+    status: 'available',
+    images: ['/images/bmw-x5.jpg'],
+    features: ['Leather Seats', 'Navigation', 'Sunroof', 'Premium Sound'],
+    location: 'Sydney, NSW',
+    registration: 'BMW001',
+    insuranceExcess: 3000,
+    deposit: 1000
   },
   {
     id: 's2',
@@ -143,9 +214,18 @@ export const vehiclesForSale: Vehicle[] = [
     year: 2023,
     color: 'Obsidian Black',
     mileage: 15000,
+    fuelType: 'Petrol',
+    transmission: 'Automatic',
+    seats: 5,
     pricePerDay: 0,
     pricePerWeek: 0,
-    features: ['Leather Seats', 'Navigation', 'Sunroof', 'Premium Sound']
+    status: 'available',
+    images: ['/images/mercedes-c-class.jpg'],
+    features: ['Leather Seats', 'Navigation', 'Sunroof', 'Premium Sound'],
+    location: 'Melbourne, VIC',
+    registration: 'MBZ002',
+    insuranceExcess: 3500,
+    deposit: 1200
   },
   {
     id: 's3',
@@ -154,9 +234,18 @@ export const vehiclesForSale: Vehicle[] = [
     year: 2022,
     color: 'Mythos Black',
     mileage: 18000,
+    fuelType: 'Petrol',
+    transmission: 'Automatic',
+    seats: 5,
     pricePerDay: 0,
     pricePerWeek: 0,
-    features: ['Leather Seats', 'Navigation', 'Sunroof', 'Premium Sound']
+    status: 'available',
+    images: ['/images/audi-a4.jpg'],
+    features: ['Leather Seats', 'Navigation', 'Sunroof', 'Premium Sound'],
+    location: 'Brisbane, QLD',
+    registration: 'AUD003',
+    insuranceExcess: 3200,
+    deposit: 1100
   },
   {
     id: 's4',
@@ -165,9 +254,18 @@ export const vehiclesForSale: Vehicle[] = [
     year: 2023,
     color: 'Mineral Grey',
     mileage: 12000,
+    fuelType: 'Petrol',
+    transmission: 'Automatic',
+    seats: 5,
     pricePerDay: 0,
     pricePerWeek: 0,
-    features: ['Leather Seats', 'Navigation', 'Sunroof', 'Premium Sound']
+    status: 'available',
+    images: ['/images/bmw-3series.jpg'],
+    features: ['Leather Seats', 'Navigation', 'Sunroof', 'Premium Sound'],
+    location: 'Perth, WA',
+    registration: 'BMW004',
+    insuranceExcess: 2800,
+    deposit: 900
   },
   {
     id: 's5',
@@ -176,9 +274,18 @@ export const vehiclesForSale: Vehicle[] = [
     year: 2022,
     color: 'Diamond White',
     mileage: 20000,
+    fuelType: 'Petrol',
+    transmission: 'Automatic',
+    seats: 5,
     pricePerDay: 0,
     pricePerWeek: 0,
-    features: ['Leather Seats', 'Navigation', 'Sunroof', 'Premium Sound']
+    status: 'available',
+    images: ['/images/mercedes-e-class.jpg'],
+    features: ['Leather Seats', 'Navigation', 'Sunroof', 'Premium Sound'],
+    location: 'Adelaide, SA',
+    registration: 'MBZ005',
+    insuranceExcess: 4000,
+    deposit: 1500
   },
   {
     id: 's6',
@@ -187,8 +294,17 @@ export const vehiclesForSale: Vehicle[] = [
     year: 2023,
     color: 'Florett Silver',
     mileage: 10000,
+    fuelType: 'Petrol',
+    transmission: 'Automatic',
+    seats: 5,
     pricePerDay: 0,
     pricePerWeek: 0,
-    features: ['Leather Seats', 'Navigation', 'Sunroof', 'Premium Sound']
+    status: 'available',
+    images: ['/images/audi-q5.jpg'],
+    features: ['Leather Seats', 'Navigation', 'Sunroof', 'Premium Sound'],
+    location: 'Hobart, TAS',
+    registration: 'AUD006',
+    insuranceExcess: 3300,
+    deposit: 1300
   }
 ];

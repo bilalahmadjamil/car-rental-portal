@@ -3,22 +3,14 @@
 
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
-import { Car, AlertCircle } from 'lucide-react';
-import { vehicles } from '@/data/mockData';
+import { Car } from 'lucide-react';
+import { vehicles, vehiclesForSale } from '@/data/mockData';
 import { Vehicle } from '@/types';
 import { designSystem, getSectionStyling } from '@/utils/designSystem';
 
-const VehicleCard = ({ vehicle, index, isForSale = false }: { vehicle: Vehicle; index: number; isForSale?: boolean }) => {
+const VehicleCard = ({ vehicle, isForSale = false }: { vehicle: Vehicle; isForSale?: boolean }) => {
   const { cardVariants } = designSystem.animations;
 
-  const getVehicleTypeColor = (make: string) => {
-    switch (make.toLowerCase()) {
-      case 'tesla': return 'from-emerald-500 to-emerald-600';
-      case 'toyota': return 'from-blue-500 to-blue-600';
-      case 'mitsubishi': return 'from-purple-500 to-purple-600';
-      default: return 'from-gray-500 to-gray-600';
-    }
-  };
 
   return (
     <motion.div 
@@ -137,8 +129,6 @@ const VehiclesSection = () => {
   const styling = getSectionStyling('vehicles');
   const { containerVariants, itemVariants } = designSystem.animations;
   
-  // Import vehicles for sale data
-  const { vehiclesForSale } = require('@/data/mockData');
   
   const currentVehicles: Vehicle[] = activeTab === 'rental' ? vehicles : vehiclesForSale;
   
@@ -150,17 +140,6 @@ const VehiclesSection = () => {
     ? currentVehicles 
     : currentVehicles.filter((vehicle: Vehicle) => vehicle.make.toLowerCase() === filter.toLowerCase());
 
-  const filterVariants = {
-    hidden: { opacity: 0, y: 20 },
-    visible: {
-      opacity: 1,
-      y: 0,
-      transition: {
-        duration: 0.5,
-        ease: [0.25, 0.46, 0.45, 0.94] as const
-      }
-    }
-  };
 
   return (
     <section id="vehicles" className={styling.section}>
@@ -263,9 +242,9 @@ const VehiclesSection = () => {
             viewport={{ once: true }}
             key={filter} // Re-trigger animation when filter changes
           >
-            {filteredVehicles.map((vehicle: Vehicle, index: number) => (
-              <VehicleCard key={vehicle.id} vehicle={vehicle} index={index} isForSale={activeTab === 'sale'} />
-            ))}
+                {filteredVehicles.map((vehicle: Vehicle) => (
+                  <VehicleCard key={vehicle.id} vehicle={vehicle} isForSale={activeTab === 'sale'} />
+                ))}
           </motion.div>
         ) : (
           <motion.div 
