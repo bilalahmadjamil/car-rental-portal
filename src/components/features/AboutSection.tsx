@@ -230,7 +230,7 @@ const AboutSection = () => {
                               ))}
                             </div>
                             <p className="text-sm text-gray-700 font-medium">
-                              "Amazing service! The team made our car rental experience seamless and enjoyable."
+                              &ldquo;Amazing service! The team made our car rental experience seamless and enjoyable.&rdquo;
                             </p>
                           </div>
                         </div>

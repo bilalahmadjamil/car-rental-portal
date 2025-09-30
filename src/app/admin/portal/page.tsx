@@ -2,8 +2,8 @@
 
 import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { useAuth } from '../../contexts/AuthContext';
-import AdminPortal from '../../components/admin/AdminPortal';
+import { useAuth } from '@/contexts/AuthContext';
+import AdminPortal from '@/components/admin/AdminPortal';
 
 export default function AdminPortalPage() {
   const { user, isAuthenticated, isLoading } = useAuth();

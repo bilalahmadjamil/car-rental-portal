@@ -87,7 +87,7 @@ const AdminDashboard = () => {
           Welcome back, {user?.firstName}! 👋
         </h1>
         <p className="text-purple-100 text-lg">
-          Here's your AlifDrives admin dashboard overview
+          Here&apos;s your AlifDrives admin dashboard overview
         </p>
       </motion.div>
 

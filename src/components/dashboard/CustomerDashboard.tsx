@@ -69,7 +69,7 @@ const CustomerDashboard = () => {
           Welcome back, {user?.firstName}! 👋
         </h1>
         <p className="text-blue-100 text-lg">
-          Here's what's happening with your AlifDrives account
+          Here&apos;s what&apos;s happening with your AlifDrives account
         </p>
       </motion.div>
 
