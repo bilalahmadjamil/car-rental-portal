@@ -1,6 +1,8 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
+import { AuthProvider } from "../contexts/AuthContext";
+import { ConfirmationProvider } from "../contexts/ConfirmationContext";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -13,26 +15,30 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Khan Car Rentals & Sales - Premium Vehicle Services",
+  title: "AlifDrives - Premium Vehicle Services",
   description: "Your trusted partner for premium car rental and sales services across Australia. Quality, reliability, and customer satisfaction guaranteed. Browse our fleet of luxury vehicles available for rental or purchase.",
   keywords: "car rental, vehicle sales, car hire, luxury cars, premium vehicles, Australia, Brisbane, Sydney, Melbourne",
-  authors: [{ name: "Khan Car Rentals" }],
-  creator: "Khan Car Rentals",
-  publisher: "Khan Car Rentals",
+  authors: [{ name: "AlifDrives" }],
+  creator: "AlifDrives",
+  publisher: "AlifDrives",
   robots: "index, follow",
   openGraph: {
-    title: "Khan Car Rentals & Sales - Premium Vehicle Services",
+    title: "AlifDrives - Premium Vehicle Services",
     description: "Your trusted partner for premium car rental and sales services across Australia. Quality, reliability, and customer satisfaction guaranteed.",
     type: "website",
     locale: "en_AU",
-    siteName: "Khan Car Rentals",
+    siteName: "AlifDrives",
   },
   twitter: {
     card: "summary_large_image",
-    title: "Khan Car Rentals & Sales - Premium Vehicle Services",
+    title: "AlifDrives - Premium Vehicle Services",
     description: "Your trusted partner for premium car rental and sales services across Australia.",
   },
-  viewport: "width=device-width, initial-scale=1",
+};
+
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
   themeColor: "#2563eb",
 };
 
@@ -46,7 +52,11 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
-        {children}
+        <AuthProvider>
+          <ConfirmationProvider>
+            {children}
+          </ConfirmationProvider>
+        </AuthProvider>
       </body>
     </html>
   );

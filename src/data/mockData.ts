@@ -28,12 +28,12 @@ export interface ContactFormData {
 }
 
 export const companyInfo = {
-  name: 'Khan Car Rentals',
+  name: 'AlifDrives',
   description: 'Your trusted partner for premium car rental and sales services. We provide reliable, well-maintained vehicles with exceptional customer service and competitive pricing.',
   abn: '12 345 678 901',
   address: '123 Main Street, Sydney NSW 2000',
   phone: '+61 2 9876 5432',
-  email: 'info@khancarrentals.com.au',
+  email: 'info@alifdrives.com.au',
   hours: 'Mon-Fri: 8AM-6PM, Sat: 9AM-4PM, Sun: 10AM-2PM'
 };
 

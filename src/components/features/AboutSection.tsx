@@ -49,8 +49,21 @@ const AboutSection = () => {
     }
   };
   return (
-    <section id="about" className={styling.section}>
-      <div className={styling.container}>
+    <section id="about" className={`${styling.section} relative overflow-hidden`}>
+      {/* Happy Customers Background */}
+      <div className="absolute inset-0">
+        <div 
+          className="w-full h-full bg-cover bg-center bg-no-repeat opacity-10"
+          style={{
+            backgroundImage: 'url(/happy-customers.png)',
+            backgroundPosition: 'center right'
+          }}
+        />
+        {/* Gradient overlay for better text readability */}
+        <div className="absolute inset-0 bg-gradient-to-l from-white via-white/95 to-transparent"></div>
+      </div>
+      
+      <div className={`${styling.container} relative z-10`}>
         <div className="max-w-6xl mx-auto">
           <motion.div 
             className={styling.header}
@@ -120,6 +133,111 @@ const AboutSection = () => {
                     <div className="text-gray-600 font-medium text-sm">{stat.label}</div>
                   </motion.div>
                 ))}
+              </motion.div>
+
+              {/* Happy Customers Showcase */}
+              <motion.div 
+                className="mb-16"
+                variants={containerVariants}
+                initial="hidden"
+                whileInView="visible"
+                viewport={{ once: true }}
+              >
+                <motion.div 
+                  className="relative bg-gradient-to-br from-blue-50 to-indigo-100 rounded-3xl p-8 md:p-12 overflow-hidden"
+                  variants={itemVariants}
+                  whileHover={{ scale: 1.02 }}
+                  transition={{ duration: 0.3 }}
+                >
+                  {/* Happy Customers Background Image */}
+                  <div className="absolute inset-0">
+                    <div 
+                      className="w-full h-full bg-cover bg-center bg-no-repeat opacity-20"
+                      style={{
+                        backgroundImage: 'url(/happy-customers.png)',
+                        backgroundPosition: 'center right'
+                      }}
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-l from-blue-50/80 via-blue-50/60 to-transparent"></div>
+                  </div>
+                  
+                  <div className="relative z-10 grid md:grid-cols-2 gap-8 items-center">
+                    <motion.div variants={itemVariants}>
+                      <motion.div 
+                        className="inline-flex items-center px-4 py-2 bg-green-100 text-green-800 rounded-full text-sm font-semibold mb-4"
+                        initial={{ opacity: 0, x: -20 }}
+                        whileInView={{ opacity: 1, x: 0 }}
+                        transition={{ duration: 0.5 }}
+                      >
+                        <Star className="w-4 h-4 mr-2 fill-current" />
+                        Customer Satisfaction
+                      </motion.div>
+                      
+                      <h3 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
+                        Happy Customers, Happy Stories
+                      </h3>
+                      
+                      <p className="text-lg text-gray-600 mb-6 leading-relaxed">
+                        Our customers are at the heart of everything we do. See the joy and satisfaction 
+                        that comes from choosing AlifDrives for your automotive needs.
+                      </p>
+                      
+                      <div className="flex items-center space-x-6">
+                        <motion.div 
+                          className="text-center"
+                          whileHover={{ scale: 1.05 }}
+                        >
+                          <div className="text-3xl font-bold text-blue-600">1000+</div>
+                          <div className="text-sm text-gray-600">Happy Customers</div>
+                        </motion.div>
+                        <motion.div 
+                          className="text-center"
+                          whileHover={{ scale: 1.05 }}
+                        >
+                          <div className="text-3xl font-bold text-green-600">4.9/5</div>
+                          <div className="text-sm text-gray-600">Average Rating</div>
+                        </motion.div>
+                        <motion.div 
+                          className="text-center"
+                          whileHover={{ scale: 1.05 }}
+                        >
+                          <div className="text-3xl font-bold text-purple-600">98%</div>
+                          <div className="text-sm text-gray-600">Satisfaction Rate</div>
+                        </motion.div>
+                      </div>
+                    </motion.div>
+                    
+                    <motion.div 
+                      className="relative"
+                      variants={itemVariants}
+                      whileHover={{ scale: 1.05 }}
+                      transition={{ duration: 0.3 }}
+                    >
+                      <div className="relative rounded-2xl overflow-hidden shadow-2xl">
+                        <div 
+                          className="w-full h-80 bg-cover bg-center bg-no-repeat"
+                          style={{
+                            backgroundImage: 'url(/happy-customers.png)',
+                            backgroundPosition: 'center'
+                          }}
+                        />
+                        <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent"></div>
+                        <div className="absolute bottom-4 left-4 right-4">
+                          <div className="bg-white/90 backdrop-blur-sm rounded-lg p-4">
+                            <div className="flex items-center space-x-2 mb-2">
+                              {[...Array(5)].map((_, i) => (
+                                <Star key={i} className="w-4 h-4 text-yellow-400 fill-current" />
+                              ))}
+                            </div>
+                            <p className="text-sm text-gray-700 font-medium">
+                              "Amazing service! The team made our car rental experience seamless and enjoyable."
+                            </p>
+                          </div>
+                        </div>
+                      </div>
+                    </motion.div>
+                  </div>
+                </motion.div>
               </motion.div>
 
               <motion.div 

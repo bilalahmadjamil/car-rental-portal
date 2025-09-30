@@ -121,7 +121,7 @@ const ServiceCard = ({ service, index }: { service: { id: string; title: string;
               >
                 <CheckCircle className="w-3 h-3" />
               </motion.div>
-              {feature}
+          {feature}
             </motion.li>
           ))}
         </motion.ul>
@@ -146,9 +146,9 @@ const ServiceCard = ({ service, index }: { service: { id: string; title: string;
       {/* Decorative elements */}
       <div className="absolute top-4 right-4 opacity-10 group-hover:opacity-20 transition-opacity duration-300">
         <Star className="w-8 h-8 text-gray-400" />
-      </div>
+  </div>
     </motion.div>
-  );
+);
 };
 
 const ServicesSection = () => {
@@ -169,7 +169,19 @@ const ServicesSection = () => {
   };
   
   return (
-    <section id="services" className={styling.section}>
+    <section id="services" className={`${styling.section} relative overflow-hidden`}>
+      {/* Happy Customers Background */}
+      <div className="absolute inset-0">
+        <div 
+          className="w-full h-full bg-cover bg-center bg-no-repeat"
+          style={{
+            backgroundImage: 'url(/happy-customers.png)',
+            backgroundPosition: 'center left'
+          }}
+        />
+        <div className="absolute inset-0 bg-gradient-to-r from-white/90 via-white/85 to-white/90"></div>
+      </div>
+      
       {/* Enhanced background decorative elements */}
       <div className="absolute inset-0 overflow-hidden">
         <motion.div 
@@ -209,7 +221,7 @@ const ServicesSection = () => {
             ease: "easeInOut" 
           }}
         />
-      </div>
+        </div>
       
       <div className={styling.container}>
         <motion.div 
@@ -265,7 +277,19 @@ const ServicesSection = () => {
           whileInView="visible"
           viewport={{ once: true }}
         >
-          <div className="relative bg-gradient-to-br from-blue-50 via-white to-purple-50 rounded-3xl p-12 shadow-2xl border border-blue-100 max-w-4xl mx-auto overflow-hidden">
+          <div className="relative bg-gradient-to-br from-blue-50 via-white to-purple-50 rounded-3xl p-12 shadow-2xl border border-blue-100 max-w-6xl mx-auto overflow-hidden">
+            {/* Happy Customers Background */}
+            <div className="absolute inset-0">
+              <div 
+                className="w-full h-full bg-cover bg-center bg-no-repeat opacity-15"
+                style={{
+                  backgroundImage: 'url(/happy-customers.png)',
+                  backgroundPosition: 'center left'
+                }}
+              />
+              <div className="absolute inset-0 bg-gradient-to-r from-blue-50/90 via-white/95 to-transparent"></div>
+            </div>
+            
             {/* Background decoration */}
             <div className="absolute top-0 right-0 w-32 h-32 bg-blue-200/20 rounded-full -translate-y-16 translate-x-16" />
             <div className="absolute bottom-0 left-0 w-24 h-24 bg-purple-200/20 rounded-full translate-y-12 -translate-x-12" />
@@ -285,10 +309,11 @@ const ServicesSection = () => {
               </motion.div>
               
               <h3 className="text-3xl font-bold text-gray-900 mb-4">
-                Ready to Get Started?
+                Join Our Happy Customers
               </h3>
               <p className="text-gray-600 mb-8 text-lg max-w-2xl mx-auto">
-                Contact us today to discuss your specific requirements and discover how we can help you with your automotive needs.
+                Experience the same satisfaction and joy that our customers feel. Contact us today to discuss 
+                your specific requirements and discover how we can help you with your automotive needs.
               </p>
               
               <div className="flex flex-col sm:flex-row gap-4 justify-center">
@@ -325,7 +350,7 @@ const ServicesSection = () => {
                 </motion.button>
               </div>
             </motion.div>
-          </div>
+        </div>
         </motion.div>
       </div>
     </section>

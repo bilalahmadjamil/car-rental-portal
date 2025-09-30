@@ -3,330 +3,203 @@
 
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
-import { Car } from 'lucide-react';
-import { vehicles, vehiclesForSale } from '@/data/mockData';
-import { Vehicle } from '@/types';
+import { Car, Calendar, DollarSign } from 'lucide-react';
 import { designSystem, getSectionStyling } from '@/utils/designSystem';
+import { VehicleProvider } from '../../contexts/VehicleContext';
+import VehicleDisplay from './VehicleDisplay';
+import Logo from '../common/Logo';
 
-const VehicleCard = ({ vehicle, isForSale = false }: { vehicle: Vehicle; isForSale?: boolean }) => {
-  const { cardVariants } = designSystem.animations;
+interface VehiclesSectionProps {
+  showAllOption?: boolean;
+  removeTopPadding?: boolean;
+  hideCallToAction?: boolean;
+  enablePagination?: boolean;
+  showLogo?: boolean;
+}
 
+const VehiclesSection = ({ showAllOption = false, removeTopPadding = false, hideCallToAction = false, enablePagination = false, showLogo = false }: VehiclesSectionProps) => {
+  const [activeTab, setActiveTab] = useState<'rental' | 'sale' | 'both'>(showAllOption ? 'both' : 'rental');
+  const baseStyling = getSectionStyling('vehicles');
+  const styling = removeTopPadding ? {
+    ...baseStyling,
+    section: baseStyling.section.replace('py-24', 'pt-0 pb-24')
+  } : baseStyling;
+  const { containerVariants, itemVariants } = designSystem.animations;
+
+  const tabs = [
+    { id: 'rental', label: 'Rental Cars', icon: Calendar, description: 'Browse our rental fleet' },
+    { id: 'sale', label: 'Cars for Sale', icon: DollarSign, description: 'Find your perfect car' },
+    ...(showAllOption ? [{ id: 'both', label: 'All Vehicles', icon: Car, description: 'View all vehicles' }] : [])
+  ];
 
   return (
-    <motion.div 
-      className="bg-white rounded-lg shadow-sm overflow-hidden hover:shadow-md transition-shadow duration-200 border border-gray-200 relative"
-      variants={cardVariants}
-      initial="hidden"
-      whileInView="visible"
-      viewport={{ once: true }}
-    >
-      {/* Status badge - always visible */}
-      <div className="absolute top-4 right-4 z-20">
-        <span className={`text-xs font-medium px-2 py-1 rounded ${
-          isForSale 
-            ? 'bg-orange-100 text-orange-700' 
-            : 'bg-green-100 text-green-700'
-        }`}>
-          {isForSale ? 'For Sale' : 'Available'}
-        </span>
-      </div>
-
-      {/* Vehicle image placeholder */}
-          <div className="h-48 bg-gray-100 flex items-center justify-center">
-            <div className="text-center">
-              <div className="w-12 h-12 bg-gray-300 rounded-lg flex items-center justify-center mx-auto mb-2">
-                <Car className="w-6 h-6 text-gray-500" />
-              </div>
-              <span className="text-gray-500 text-sm font-medium">
-                {vehicle.year} {vehicle.make} {vehicle.model}
-              </span>
-            </div>
-          </div>
-
-      <div className="p-6">
-        {/* Vehicle title and specs */}
-        <div className="mb-4">
-          <h3 className="text-xl font-semibold text-gray-900 mb-2">
-            {vehicle.year} {vehicle.make} {vehicle.model}
-          </h3>
-          <div className="flex items-center justify-between text-sm text-gray-600">
-            <span>{vehicle.color}</span>
-            <span>{vehicle.mileage.toLocaleString()} km</span>
-          </div>
+    <VehicleProvider>
+      <section id="vehicles" className={`${styling.section} relative overflow-hidden`}>
+        {/* Enhanced Hero Background */}
+        <div className="absolute inset-0">
+          <div 
+            className="w-full h-full bg-cover bg-center bg-no-repeat bg-fixed"
+            style={{
+              backgroundImage: 'url(/hero-background.png)',
+              backgroundPosition: 'center center',
+              backgroundAttachment: 'fixed'
+            }}
+          />
+          {/* Multiple gradient overlays for depth */}
+          <div className="absolute inset-0 bg-gradient-to-br from-blue-900/20 via-transparent to-blue-800/30"></div>
+          <div className="absolute inset-0 bg-gradient-to-t from-white/85 via-white/70 to-white/60"></div>
+          <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/40 to-transparent"></div>
         </div>
         
-        {/* Features */}
-        <div className="flex flex-wrap gap-2 mb-6">
-          {vehicle.features.slice(0, 3).map((feature, featureIndex) => (
-            <span 
-              key={featureIndex} 
-              className="px-2 py-1 bg-gray-100 text-gray-700 text-xs rounded"
+        {/* Enhanced background decorative elements */}
+        <div className="absolute inset-0 overflow-hidden">
+          {/* Primary floating element */}
+          <motion.div 
+            className="absolute -top-40 -right-40 w-80 h-80 rounded-full mix-blend-multiply filter blur-xl opacity-40 bg-gradient-to-br from-blue-400 to-blue-600"
+            animate={{ 
+              scale: [1, 1.1, 1],
+              rotate: [0, 180, 360],
+              x: [0, 20, 0],
+              y: [0, -10, 0]
+            }}
+            transition={{ 
+              duration: 20, 
+              repeat: Infinity, 
+              ease: "linear" 
+            }}
+          />
+          {/* Secondary floating element */}
+          <motion.div 
+            className="absolute -bottom-40 -left-40 w-96 h-96 rounded-full mix-blend-multiply filter blur-xl opacity-30 bg-gradient-to-tr from-green-400 to-blue-500"
+            animate={{ 
+              scale: [1, 1.2, 1],
+              rotate: [360, 180, 0],
+              x: [0, -15, 0],
+              y: [0, 10, 0]
+            }}
+            transition={{ 
+              duration: 25, 
+              repeat: Infinity, 
+              ease: "linear" 
+            }}
+          />
+          {/* Tertiary floating element */}
+          <motion.div 
+            className="absolute top-1/2 left-1/2 w-64 h-64 rounded-full mix-blend-multiply filter blur-2xl opacity-20 bg-gradient-to-br from-purple-400 to-pink-500"
+            animate={{ 
+              scale: [0.8, 1.3, 0.8],
+              rotate: [0, 360, 0],
+              x: [-20, 20, -20],
+              y: [-10, 10, -10]
+            }}
+            transition={{ 
+              duration: 30, 
+              repeat: Infinity, 
+              ease: "easeInOut" 
+            }}
+          />
+        </div>
+
+        <div className="container mx-auto px-4 py-8 relative z-10">
+          <motion.div 
+            className="text-center mb-6"
+            variants={containerVariants}
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true }}
+          >
+            {showLogo ? (
+              <motion.div 
+                className="flex justify-center mb-4"
+                variants={itemVariants}
+              >
+                <Logo size="lg" showText={false} />
+              </motion.div>
+            ) : (
+              <>
+                <motion.h2 
+                  className="text-xl md:text-2xl font-bold text-gray-900 mb-1"
+                  variants={itemVariants}
+                >
+                  Find Your Perfect Ride
+                </motion.h2>
+                <motion.p 
+                  className="text-gray-600 text-sm max-w-xl mx-auto"
+                  variants={itemVariants}
+                >
+                  Discover our curated selection of premium vehicles
+                </motion.p>
+              </>
+            )}
+          </motion.div>
+
+          {/* Tabs */}
+          <motion.div 
+            className="flex justify-center mb-6"
+            variants={itemVariants}
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true }}
+          >
+            <div className="bg-white/80 backdrop-blur-sm rounded-xl p-1.5 shadow-md border border-gray-200">
+              <div className="flex space-x-1">
+                {tabs.map((tab) => (
+                  <button
+                    key={tab.id}
+                    onClick={() => setActiveTab(tab.id as any)}
+                    className={`flex items-center space-x-2 px-4 py-2 rounded-lg transition-all duration-300 text-sm ${
+                      activeTab === tab.id
+                        ? 'bg-blue-600 text-white shadow-md'
+                        : 'text-gray-700 hover:bg-blue-50 hover:text-blue-700'
+                    }`}
+                  >
+                    <tab.icon className="w-4 h-4" />
+                    <span className="font-medium">{tab.label}</span>
+                  </button>
+                ))}
+              </div>
+            </div>
+          </motion.div>
+
+          {/* Vehicle Display */}
+          <motion.div
+            variants={itemVariants}
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true }}
+          >
+            <VehicleDisplay 
+              type={activeTab}
+              showFilters={true}
+              enablePagination={enablePagination}
+            />
+          </motion.div>
+
+          {/* Call to Action - Only show when not hidden */}
+          {!hideCallToAction && (
+            <motion.div 
+              className="text-center mt-8"
+              variants={itemVariants}
+              initial="hidden"
+              whileInView="visible"
+              viewport={{ once: true }}
             >
-              {feature}
-            </span>
-          ))}
-        </div>
-        
-        {/* Pricing section */}
-        <div className="bg-gray-50 rounded-lg p-4 mb-6">
-          {isForSale ? (
-            // Sale pricing
-            <div className="text-center">
-              <div className="text-2xl font-bold text-gray-900 mb-1">
-                ${vehicle.pricePerDay * 100}
-              </div>
-              <div className="text-sm text-gray-600">Purchase Price</div>
-            </div>
-          ) : (
-            // Rental pricing
-            <div className="flex justify-between items-center">
-              <div className="text-center flex-1">
-                <div className="text-2xl font-bold text-blue-600">
-                  ${vehicle.pricePerDay}
-                </div>
-                <div className="text-sm text-gray-600">per day</div>
-              </div>
-              <div className="w-px h-8 bg-gray-300 mx-4"></div>
-              <div className="text-center flex-1">
-                <div className="text-xl font-bold text-gray-900">
-                  ${vehicle.pricePerWeek}
-                </div>
-                <div className="text-sm text-gray-600">per week</div>
-              </div>
-            </div>
+              <motion.a
+                href="/vehicles"
+                className="inline-flex items-center justify-center px-5 py-2.5 bg-gradient-to-r from-blue-600 to-blue-800 text-white rounded-lg text-sm font-medium shadow-md hover:shadow-lg transition-all duration-300 group"
+                whileHover={{ scale: 1.05, y: -2 }}
+                whileTap={{ scale: 0.95 }}
+              >
+                {activeTab === 'rental' ? 'Browse All Rentals' : 
+                 activeTab === 'sale' ? 'View All Cars for Sale' : 
+                 'Explore All Vehicles'}
+                <Car className="ml-2 w-4 h-4 group-hover:translate-x-1 transition-transform duration-300" />
+              </motion.a>
+            </motion.div>
           )}
         </div>
-        
-        {/* CTA button */}
-        <button 
-          className={`w-full py-3 px-6 rounded-lg font-medium transition-colors duration-200 ${
-            isForSale 
-              ? 'bg-orange-600 hover:bg-orange-700 text-white'
-              : 'bg-blue-600 hover:bg-blue-700 text-white'
-          }`}
-        >
-          {isForSale ? 'Buy This Vehicle' : 'Rent This Vehicle'}
-        </button>
-      </div>
-    </motion.div>
-  );
-};
-
-const VehiclesSection = () => {
-  const [activeTab, setActiveTab] = useState('rental'); // 'rental' or 'sale'
-  const [filter, setFilter] = useState('all');
-  
-  // Reset filter when switching tabs
-  const handleTabChange = (newTab: string) => {
-    setActiveTab(newTab);
-    setFilter('all'); // Reset filter when switching tabs
-  };
-  
-  // Also reset filter when activeTab changes (extra safety)
-  React.useEffect(() => {
-    setFilter('all');
-  }, [activeTab]);
-  const styling = getSectionStyling('vehicles');
-  const { containerVariants, itemVariants } = designSystem.animations;
-  
-  
-  const currentVehicles: Vehicle[] = activeTab === 'rental' ? vehicles : vehiclesForSale;
-  
-  // Dynamically get available car makes from current vehicles
-  const availableMakes = Array.from(new Set(currentVehicles.map(vehicle => vehicle.make)));
-  const allMakes = ['all', ...availableMakes];
-  
-  const filteredVehicles = filter === 'all' 
-    ? currentVehicles 
-    : currentVehicles.filter((vehicle: Vehicle) => vehicle.make.toLowerCase() === filter.toLowerCase());
-
-
-  return (
-    <section id="vehicles" className={styling.section}>
-      {/* Background decorative elements */}
-      <div className="absolute inset-0 overflow-hidden">
-        <div className={`${designSystem.decorativeElements.floating} bg-blue-100/20`}></div>
-        <div className={`${designSystem.decorativeElements.floatingDelayed} bg-emerald-100/20`} style={{ animationDelay: '2s' }}></div>
-      </div>
-      
-      <div className={styling.container}>
-        <motion.div 
-          className={styling.header}
-          variants={containerVariants}
-          initial="hidden"
-          whileInView="visible"
-          viewport={{ once: true }}
-        >
-          
-          <motion.h2 
-            className={designSystem.typography.sectionTitle}
-            variants={itemVariants}
-          >
-            Our Vehicles
-          </motion.h2>
-          
-          <motion.p 
-            className={designSystem.typography.sectionSubtitle}
-            variants={itemVariants}
-          >
-            Choose from our premium selection of vehicles available for rental or purchase. 
-            Each vehicle is meticulously maintained and selected for comfort, reliability, and exceptional performance.
-          </motion.p>
-        </motion.div>
-        
-        {/* Professional Rental vs Sale Tabs */}
-        <motion.div 
-          className="flex justify-center mb-12"
-          variants={containerVariants}
-          initial="hidden"
-          whileInView="visible"
-          viewport={{ once: true }}
-        >
-          <div className="bg-gray-100 rounded-lg p-1">
-            <div className="flex">
-              {[
-                { key: 'rental', label: 'Rental Vehicles' },
-                { key: 'sale', label: 'Vehicles for Sale' }
-              ].map((tab) => (
-                <button
-                  key={tab.key}
-                  data-tab={tab.key}
-                  onClick={() => handleTabChange(tab.key)}
-                  className={`px-8 py-3 rounded-md text-sm font-medium transition-all duration-200 ${
-                    activeTab === tab.key 
-                      ? 'bg-white text-gray-900 shadow-sm' 
-                      : 'text-gray-600 hover:text-gray-900'
-                  }`}
-                >
-                  {tab.label}
-                </button>
-              ))}
-            </div>
-          </div>
-        </motion.div>
-        
-        {/* Dynamic Filter Controls */}
-        {availableMakes.length > 0 && (
-          <motion.div 
-            className="flex justify-center mb-12"
-            variants={containerVariants}
-            initial="hidden"
-            whileInView="visible"
-            viewport={{ once: true }}
-          >
-            <div className="flex flex-wrap justify-center gap-2">
-              {allMakes.map((make) => (
-                <button
-                  key={make}
-                  onClick={() => setFilter(make)}
-                  className={`px-6 py-2 rounded-full text-sm font-medium transition-all duration-200 ${
-                    filter === make 
-                      ? 'bg-blue-600 text-white' 
-                      : 'bg-white text-gray-600 hover:text-gray-900 hover:bg-gray-50 border border-gray-200'
-                  }`}
-                >
-                  {make === 'all' ? 'All Vehicles' : make}
-                </button>
-              ))}
-            </div>
-          </motion.div>
-        )}
-        
-        {/* Vehicle Grid or No Cars Message */}
-        {filteredVehicles.length > 0 ? (
-          <motion.div 
-            className="grid md:grid-cols-2 lg:grid-cols-3 gap-8"
-            variants={containerVariants}
-            initial="hidden"
-            whileInView="visible"
-            viewport={{ once: true }}
-            key={filter} // Re-trigger animation when filter changes
-          >
-                {filteredVehicles.map((vehicle: Vehicle) => (
-                  <VehicleCard key={vehicle.id} vehicle={vehicle} isForSale={activeTab === 'sale'} />
-                ))}
-          </motion.div>
-        ) : (
-          <motion.div 
-            className="text-center py-16"
-            variants={containerVariants}
-            initial="hidden"
-            whileInView="visible"
-            viewport={{ once: true }}
-          >
-            <div className="max-w-md mx-auto">
-              <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                <Car className="w-8 h-8 text-gray-500" />
-              </div>
-              <h3 className="text-xl font-semibold text-gray-900 mb-2">
-                {filter === 'all' 
-                  ? `No ${activeTab === 'rental' ? 'Rental' : 'Sale'} Vehicles Available`
-                  : `No ${filter} Vehicles Available`
-                }
-              </h3>
-              <p className="text-gray-600 mb-6">
-                {filter === 'all' 
-                  ? `We currently don't have any vehicles available for ${activeTab === 'rental' ? 'rental' : 'sale'}. Please check back later or contact us for more information.`
-                  : `We don't have any ${filter} vehicles available at the moment. Try selecting a different brand or contact us for availability.`
-                }
-              </p>
-              <div className="flex flex-col sm:flex-row gap-3 justify-center">
-                <button 
-                  onClick={() => setFilter('all')}
-                  className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg font-medium transition-colors duration-200"
-                >
-                  View All Vehicles
-                </button>
-                <button 
-                  onClick={() => document.getElementById('contact')?.scrollIntoView({ behavior: 'smooth' })}
-                  className="border border-gray-300 text-gray-700 hover:bg-gray-50 px-6 py-3 rounded-lg font-medium transition-colors duration-200"
-                >
-                  Contact Us
-                </button>
-              </div>
-            </div>
-          </motion.div>
-        )}
-        
-        {/* CTA section */}
-        <motion.div 
-          className="mt-16 text-center"
-          variants={containerVariants}
-          initial="hidden"
-          whileInView="visible"
-          viewport={{ once: true }}
-        >
-          <div className="bg-white rounded-lg p-8 shadow-sm border border-gray-200 max-w-2xl mx-auto">
-            <h3 className="text-xl font-semibold text-gray-900 mb-4">
-              {activeTab === 'rental' 
-                ? "Need a Different Vehicle?" 
-                : "Looking for Something Specific?"
-              }
-            </h3>
-            <p className="text-gray-600 mb-6">
-              {activeTab === 'rental' 
-                ? "Contact us to discuss your rental requirements."
-                : "Contact us to discuss your purchase requirements."
-              }
-            </p>
-            <div className="flex flex-col sm:flex-row gap-3 justify-center">
-              <button 
-                className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg font-medium transition-colors duration-200"
-                onClick={() => document.getElementById('contact')?.scrollIntoView({ behavior: 'smooth' })}
-              >
-                Contact Us
-              </button>
-              <button 
-                className="border border-gray-300 text-gray-700 hover:bg-gray-50 px-6 py-3 rounded-lg font-medium transition-colors duration-200"
-                onClick={() => setActiveTab(activeTab === 'rental' ? 'sale' : 'rental')}
-              >
-                {activeTab === 'rental' ? 'View for Sale' : 'View for Rental'}
-              </button>
-            </div>
-          </div>
-        </motion.div>
-      </div>
-    </section>
+      </section>
+    </VehicleProvider>
   );
 };
 
