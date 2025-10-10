@@ -284,7 +284,7 @@ const InlineBookingForm = ({ vehicle, mode, selectedDates, onClose }: InlineBook
               {mode === 'rental' ? 'Rental Request Submitted!' : 'Purchase Request Submitted!'}
             </h3>
             <p className="text-gray-600">
-              We'll review your request and get back to you shortly.
+              We&apos;ll review your request and get back to you shortly.
             </p>
           </motion.div>
         ) : (
