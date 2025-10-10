@@ -89,10 +89,10 @@ const BookingManagement = () => {
     try {
       if (type === 'rental') {
         await apiClient.patch(`/bookings/admin/rentals/${id}/status`, { status });
-        setRentals(rentals.map(r => r.id === id ? { ...r, status } : r));
+        setRentals(rentals.map(r => r.id === id ? { ...r, status: status as Rental['status'] } : r));
       } else {
         await apiClient.patch(`/bookings/admin/sales/${id}/status`, { status });
-        setSales(sales.map(s => s.id === id ? { ...s, status } : r));
+        setSales(sales.map(s => s.id === id ? { ...s, status: status as Sale['status'] } : s));
       }
     } catch (err) {
       setError('Failed to update status');
