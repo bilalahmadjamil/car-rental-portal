@@ -3,9 +3,9 @@
 import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '../../contexts/AuthContext';
+import DashboardLayout from '../../components/dashboard/DashboardLayout';
 import CustomerDashboard from '../../components/dashboard/CustomerDashboard';
 import AdminDashboard from '../../components/dashboard/AdminDashboard';
-import DashboardLayout from '../../components/dashboard/DashboardLayout';
 
 export default function DashboardPage() {
   const { user, isAuthenticated, isLoading } = useAuth();
@@ -33,7 +33,7 @@ export default function DashboardPage() {
 
   return (
     <DashboardLayout 
-      title={isAdmin ? "Admin Dashboard" : "My Dashboard"} 
+      title="Dashboard" 
       userRole={user.role as 'CUSTOMER' | 'ADMIN' | 'SUPER_ADMIN'}
     >
       {isAdmin ? <AdminDashboard /> : <CustomerDashboard />}

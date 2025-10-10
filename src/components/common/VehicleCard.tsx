@@ -1,7 +1,9 @@
 'use client';
 
+import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { Car, Star, Eye, Edit, Trash2 } from 'lucide-react';
+import { Car, Eye, Edit, Trash2 } from 'lucide-react';
+import { useRouter } from 'next/navigation';
 import ToggleSwitch from './ToggleSwitch';
 // Define interfaces locally to match the admin dashboard
 interface Vehicle {
@@ -13,6 +15,7 @@ interface Vehicle {
   subcategoryId: string;
   type: 'rental' | 'sale' | 'both';
   dailyRate?: number;
+  weeklyRate?: number;
   salePrice?: number;
   description: string;
   features: string[];
@@ -51,6 +54,9 @@ interface VehicleCardProps {
   onToggleActive?: (vehicle: Vehicle) => void;
   onView?: (vehicle: Vehicle) => void;
   compact?: boolean;
+  rentalDays?: number | null;
+  rentalFromDate?: string | null;
+  rentalToDate?: string | null;
 }
 
 const VehicleCard = ({
@@ -63,14 +69,70 @@ const VehicleCard = ({
   onDelete,
   onToggleActive,
   onView,
-  compact = false
+  compact = false,
+  rentalDays = null,
+  rentalFromDate = null,
+  rentalToDate = null
 }: VehicleCardProps) => {
+  const router = useRouter();
+  const [isNavigating, setIsNavigating] = useState(false);
+  
   // Parse images and features from JSON strings if needed
   const parsedImages = Array.isArray(vehicle.images) ? vehicle.images : 
     (typeof vehicle.images === 'string' ? JSON.parse(vehicle.images || '[]') : []);
   
   const parsedFeatures = Array.isArray(vehicle.features) ? vehicle.features : 
     (typeof vehicle.features === 'string' ? JSON.parse(vehicle.features || '[]') : []);
+
+  // Reset loading state after navigation
+  useEffect(() => {
+    if (isNavigating) {
+      const timer = setTimeout(() => {
+        setIsNavigating(false);
+      }, 3000); // Reset after 3 seconds as fallback
+      
+      return () => clearTimeout(timer);
+    }
+  }, [isNavigating]);
+
+  // Format dates for display
+  const formatDateRange = () => {
+    if (!rentalFromDate || !rentalToDate) return null;
+    
+    const fromDate = new Date(rentalFromDate);
+    const toDate = new Date(rentalToDate);
+    
+    const formatDate = (date: Date) => {
+      return date.toLocaleDateString('en-US', { 
+        month: 'short', 
+        day: 'numeric',
+        year: 'numeric'
+      });
+    };
+    
+    return `${formatDate(fromDate)} - ${formatDate(toDate)}`;
+  };
+
+  // Calculate estimated rental cost based on days and rates
+  const calculateEstimatedCost = () => {
+    // Only calculate for rental vehicles when dates are selected
+    if (!rentalDays || vehicle.type !== 'rental') return null;
+    
+    const days = rentalDays;
+    const dailyRate = vehicle.dailyRate;
+    const weeklyRate = vehicle.weeklyRate;
+    
+    if (days >= 7 && weeklyRate) {
+      // Use weekly rate for 7+ days
+      const weeks = Math.ceil(days / 7);
+      return weeks * weeklyRate;
+    } else if (dailyRate) {
+      // Use daily rate for less than 7 days
+      return days * dailyRate;
+    }
+    
+    return null;
+  };
 
   const getPriceColor = (type: string) => {
     switch (type) {
@@ -92,10 +154,10 @@ const VehicleCard = ({
 
   return (
     <motion.div
-      initial={{ opacity: 0, y: 20 }}
+      initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
-      transition={{ delay: index * 0.1 }}
-      className={`bg-white rounded-lg shadow-md hover:shadow-lg transition-all duration-300 border border-gray-100 overflow-hidden group ${
+      transition={{ duration: 0.3, delay: index * 0.05 }}
+      className={`bg-white rounded-lg shadow-md hover:shadow-lg transition-shadow duration-200 border border-gray-100 overflow-hidden group ${
         !vehicle.isActive ? 'opacity-60' : ''
       }`}
     >
@@ -105,7 +167,7 @@ const VehicleCard = ({
           <img
             src={parsedImages[0]}
             alt={`${vehicle.year} ${vehicle.make} ${vehicle.model}`}
-            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+            className="w-full h-full object-cover group-hover:scale-102 transition-transform duration-200"
             onError={(e) => {
               e.currentTarget.style.display = 'none';
             }}
@@ -176,10 +238,69 @@ const VehicleCard = ({
         {/* Pricing */}
         <div className="flex items-center justify-between">
           <div className="flex items-center space-x-2">
-            {vehicle.type === 'rental' && vehicle.dailyRate && (
-              <span className={`${compact ? 'text-sm' : 'text-lg'} font-bold ${getPriceColor(vehicle.type)}`}>
-                ${vehicle.dailyRate}/day
-              </span>
+            {vehicle.type === 'rental' && (
+              <div className="flex flex-col">
+                {rentalDays ? (
+                  // Show estimated cost when rental days are selected
+                  (() => {
+                    const estimatedCost = calculateEstimatedCost();
+                    return estimatedCost ? (
+                      <div className="space-y-2">
+                        {/* Main estimated cost */}
+                        <div className="bg-green-50 border border-green-200 rounded-lg p-2">
+                          <div className="flex items-center justify-between">
+                            <div className="flex items-center text-green-700">
+                              <span className={`${compact ? 'text-sm' : 'text-lg'} font-bold`}>
+                                ${estimatedCost.toFixed(2)}
+                              </span>
+                            </div>
+                            <span className="text-xs bg-green-100 text-green-700 px-2 py-0.5 rounded-full">
+                              estimated
+                            </span>
+                          </div>
+                          <div className="text-xs text-green-600 mt-1">
+                            {formatDateRange()}
+                          </div>
+                        </div>
+                        
+                        {/* Base rates in a compact format */}
+                        <div className="flex items-center justify-between text-xs text-gray-600">
+                          {vehicle.dailyRate && (
+                            <span className="flex items-center">
+                              <span className="font-medium">{vehicle.dailyRate}</span>
+                              <span className="ml-1">/day</span>
+                            </span>
+                          )}
+                          {vehicle.weeklyRate && (
+                            <span className="flex items-center">
+                              <span className="font-medium">{vehicle.weeklyRate}</span>
+                              <span className="ml-1">/week</span>
+                            </span>
+                          )}
+                        </div>
+                      </div>
+                    ) : (
+                      <span className={`${compact ? 'text-xs' : 'text-sm'} text-gray-500`}>
+                        Rate not available
+                      </span>
+                    );
+                  })()
+                ) : (
+                  // Show regular rates when no dates selected
+                  <>
+                    {vehicle.dailyRate && (
+                      <span className={`${compact ? 'text-sm' : 'text-lg'} font-bold ${getPriceColor(vehicle.type)}`}>
+                        ${vehicle.dailyRate}/day
+                      </span>
+                    )}
+                    {vehicle.weeklyRate && (
+                      <span className={`${compact ? 'text-xs' : 'text-sm'} font-medium ${getPriceColor(vehicle.type)} opacity-80`}>
+                        ${vehicle.weeklyRate}/week
+                      </span>
+                    )}
+                  </>
+                )}
+              </div>
             )}
             {vehicle.type === 'sale' && vehicle.salePrice && (
               <span className={`${compact ? 'text-sm' : 'text-lg'} font-bold ${getPriceColor(vehicle.type)}`}>
@@ -188,15 +309,83 @@ const VehicleCard = ({
             )}
             {vehicle.type === 'both' && (
               <div className="flex flex-col">
-                {vehicle.dailyRate && (
-                  <span className={`${compact ? 'text-xs' : 'text-sm'} font-bold text-green-600`}>
-                    ${vehicle.dailyRate}/day
-                  </span>
-                )}
-                {vehicle.salePrice && (
-                  <span className={`${compact ? 'text-xs' : 'text-sm'} font-bold text-blue-600`}>
-                    ${vehicle.salePrice.toLocaleString()}
-                  </span>
+                {rentalDays ? (
+                  // Show estimated rental cost when dates are selected (rental portion only)
+                  (() => {
+                    const estimatedCost = calculateEstimatedCost();
+                    return estimatedCost ? (
+                      <div className="space-y-2">
+                        {/* Main estimated rental cost */}
+                        <div className="bg-green-50 border border-green-200 rounded-lg p-2">
+                          <div className="flex items-center justify-between">
+                            <div className="flex items-center text-green-700">
+                              <span className={`${compact ? 'text-xs' : 'text-sm'} font-bold`}>
+                                ${estimatedCost.toFixed(2)}
+                              </span>
+                            </div>
+                            <span className="text-xs bg-green-100 text-green-700 px-2 py-0.5 rounded-full">
+                              rental
+                            </span>
+                          </div>
+                          <div className="text-xs text-green-600 mt-1">
+                            {formatDateRange()}
+                          </div>
+                        </div>
+                        
+                        {/* Base rates and sale price */}
+                        <div className="space-y-1">
+                          {/* Base rental rates */}
+                          <div className="flex items-center justify-between text-xs text-gray-600">
+                            {vehicle.dailyRate && (
+                              <span className="flex items-center">
+                                <span className="font-medium">{vehicle.dailyRate}</span>
+                                <span className="ml-1">/day</span>
+                              </span>
+                            )}
+                            {vehicle.weeklyRate && (
+                              <span className="flex items-center">
+                                <span className="font-medium">{vehicle.weeklyRate}</span>
+                                <span className="ml-1">/week</span>
+                              </span>
+                            )}
+                          </div>
+                          
+                          {/* Sale price */}
+                          {vehicle.salePrice && (
+                            <div className="flex items-center text-blue-600 text-xs">
+                              <span className="font-medium">{vehicle.salePrice.toLocaleString()}</span>
+                              <span className="text-xs ml-1 bg-blue-100 text-blue-700 px-2 py-0.5 rounded-full">
+                                sale
+                              </span>
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    ) : (
+                      <span className={`${compact ? 'text-xs' : 'text-sm'} text-gray-500`}>
+                        Rental rate not available
+                      </span>
+                    );
+                  })()
+                ) : (
+                  // Show regular rates when no dates selected
+                  <>
+                    {vehicle.dailyRate && (
+                      <span className={`${compact ? 'text-xs' : 'text-sm'} font-bold text-green-600`}>
+                        ${vehicle.dailyRate}/day
+                      </span>
+                    )}
+                    {vehicle.weeklyRate && (
+                      <span className={`${compact ? 'text-xs' : 'text-xs'} font-medium text-green-500 opacity-80`}>
+                        ${vehicle.weeklyRate}/week
+                      </span>
+                    )}
+                    {vehicle.salePrice && (
+                      <span className={`${compact ? 'text-xs' : 'text-sm'} font-bold text-blue-600`}>
+                        ${vehicle.salePrice.toLocaleString()}
+                      </span>
+                    )}
+                  </>
                 )}
               </div>
             )}
@@ -204,12 +393,27 @@ const VehicleCard = ({
           
           {!showAdminControls && (
             <button
-              className={`px-4 py-2 rounded-lg text-white font-medium transition-colors ${getButtonColor(vehicle.type)} ${
+              onClick={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                setIsNavigating(true);
+                router.push(`/vehicle/${vehicle.id}`);
+              }}
+              disabled={isNavigating}
+              className={`px-4 py-2 rounded-lg text-white font-medium transition-colors hover:opacity-90 ${getButtonColor(vehicle.type)} ${
                 compact ? 'text-sm px-3 py-1.5' : ''
-              }`}
+              } ${isNavigating ? 'opacity-75 cursor-not-allowed' : ''}`}
+              style={{ zIndex: 10, position: 'relative' }}
             >
-              {vehicle.type === 'rental' ? 'Rent Now' : 
-               vehicle.type === 'sale' ? 'Buy Now' : 'View Options'}
+              {isNavigating ? (
+                <div className="flex items-center justify-center space-x-2">
+                  <div className="animate-spin rounded-full h-3 w-3 border-t-2 border-b-2 border-white"></div>
+                  <span>Loading...</span>
+                </div>
+              ) : (
+                vehicle.type === 'rental' ? 'Rent Now' : 
+                vehicle.type === 'sale' ? 'Buy Now' : 'View Options'
+              )}
             </button>
           )}
         </div>

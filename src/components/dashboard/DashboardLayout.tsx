@@ -98,7 +98,7 @@ export default function DashboardLayout({ children, title, userRole }: Dashboard
                   {user?.firstName} {user?.lastName}
                 </p>
                 <p className="text-xs text-gray-500 capitalize">
-                  {userRole.toLowerCase().replace('_', ' ')}
+                  {userRole?.toLowerCase().replace('_', ' ') || 'User'}
                 </p>
               </div>
             </div>

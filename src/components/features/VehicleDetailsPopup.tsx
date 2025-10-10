@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, Calendar, DollarSign, Car, Fuel, Users, Settings, Star, MapPin, Clock, Shield, Zap } from 'lucide-react';
+import { X, Calendar, DollarSign, Car, Fuel, Settings, Clock, Shield, Zap } from 'lucide-react';
 
 interface VehicleDetailsPopupProps {
   vehicle: any;
@@ -124,21 +124,21 @@ const VehicleDetailsPopup = ({ vehicle, isOpen, onClose }: VehicleDetailsPopupPr
             initial={{ scale: 0.9, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
             exit={{ scale: 0.9, opacity: 0 }}
-            className="bg-white rounded-2xl shadow-2xl max-w-6xl w-full max-h-[90vh] overflow-hidden"
+            className="bg-white rounded-2xl shadow-2xl max-w-6xl w-full max-h-[90vh] overflow-hidden mx-4 sm:mx-0"
             onClick={(e) => e.stopPropagation()}
           >
             {/* Header */}
-            <div className="flex items-center justify-between p-6 border-b border-gray-200 bg-gradient-to-r from-blue-50 to-indigo-50">
-              <div className="flex items-center space-x-4">
-                <div className="p-3 bg-white rounded-xl shadow-sm">
-                  <Car className="w-8 h-8 text-blue-600" />
+            <div className="flex items-center justify-between p-4 sm:p-6 border-b border-gray-200 bg-gradient-to-r from-blue-50 to-indigo-50">
+              <div className="flex items-center space-x-3 sm:space-x-4 flex-1 min-w-0">
+                <div className="p-2 sm:p-3 bg-white rounded-xl shadow-sm flex-shrink-0">
+                  <Car className="w-6 h-6 sm:w-8 sm:h-8 text-blue-600" />
                 </div>
-                <div>
-                  <h2 className="text-2xl font-bold text-gray-900">
+                <div className="min-w-0 flex-1">
+                  <h2 className="text-lg sm:text-2xl font-bold text-gray-900 truncate">
                     {vehicle.year} {vehicle.make} {vehicle.model}
                   </h2>
-                  <div className="flex items-center space-x-2 mt-1">
-                    <span className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium border ${getTypeColor(vehicle.type)}`}>
+                  <div className="flex items-center space-x-2 mt-1 flex-wrap">
+                    <span className={`inline-flex items-center px-2 sm:px-3 py-1 rounded-full text-xs sm:text-sm font-medium border ${getTypeColor(vehicle.type)}`}>
                       {getTypeIcon(vehicle.type)}
                       <span className="ml-1">
                         {vehicle.type === 'rental' ? 'For Rent' : 
@@ -146,7 +146,7 @@ const VehicleDetailsPopup = ({ vehicle, isOpen, onClose }: VehicleDetailsPopupPr
                       </span>
                     </span>
                     {vehicle.category && (
-                      <span className="text-sm text-gray-600 bg-gray-100 px-2 py-1 rounded-full">
+                      <span className="text-xs sm:text-sm text-gray-600 bg-gray-100 px-2 py-1 rounded-full">
                         {vehicle.category.name}
                       </span>
                     )}
@@ -155,9 +155,9 @@ const VehicleDetailsPopup = ({ vehicle, isOpen, onClose }: VehicleDetailsPopupPr
               </div>
               <button
                 onClick={onClose}
-                className="p-2 hover:bg-gray-100 rounded-full transition-colors"
+                className="p-2 hover:bg-gray-100 rounded-full transition-colors flex-shrink-0"
               >
-                <X className="w-6 h-6 text-gray-500" />
+                <X className="w-5 h-5 sm:w-6 sm:h-6 text-gray-500" />
               </button>
             </div>
 
@@ -165,7 +165,7 @@ const VehicleDetailsPopup = ({ vehicle, isOpen, onClose }: VehicleDetailsPopupPr
               {/* Image Gallery */}
               <div className="lg:w-1/2 bg-gray-50 relative">
                 {images.length > 0 ? (
-                  <div className="relative h-80 lg:h-full">
+                  <div className="relative h-80 lg:h-full min-h-[400px]">
                     <img
                       src={images[currentImageIndex]}
                       alt={`${vehicle.year} ${vehicle.make} ${vehicle.model}`}
@@ -202,7 +202,7 @@ const VehicleDetailsPopup = ({ vehicle, isOpen, onClose }: VehicleDetailsPopupPr
                             key={index}
                             onClick={() => setCurrentImageIndex(index)}
                             className={`w-2 h-2 rounded-full transition-all ${
-                              index === currentImageIndex ? 'bg-white' : 'bg-white bg-opacity-50'
+                              index === currentImageIndex ? 'bg-white' : 'bg-white/50'
                             }`}
                           />
                         ))}
@@ -220,22 +220,17 @@ const VehicleDetailsPopup = ({ vehicle, isOpen, onClose }: VehicleDetailsPopupPr
               </div>
 
               {/* Content */}
-              <div className="lg:w-1/2 p-6 overflow-y-auto">
+              <div className="lg:w-1/2 p-4 sm:p-6 overflow-y-auto">
                 {/* Pricing */}
                 <div className="mb-6">
-                  <div className="flex items-center justify-between mb-4">
+                  <div className="mb-4">
                     <h3 className="text-lg font-semibold text-gray-900">Pricing</h3>
-                    <div className="flex items-center space-x-1 text-yellow-500">
-                      {[...Array(5)].map((_, i) => (
-                        <Star key={i} className="w-4 h-4 fill-current" />
-                      ))}
-                      <span className="ml-2 text-sm text-gray-600">4.8 (24 reviews)</span>
-                    </div>
                   </div>
                   
-                  <div className="grid grid-cols-2 gap-4">
-                    {vehicle.type === 'rental' && vehicle.dailyRate > 0 && (
-                      <div className="bg-blue-50 p-4 rounded-xl">
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                    {/* Rental Pricing */}
+                    {(vehicle.type === 'rental' || vehicle.type === 'both') && vehicle.dailyRate > 0 && (
+                      <div className="bg-blue-50 p-4 rounded-xl border border-blue-100">
                         <div className="flex items-center space-x-2 mb-2">
                           <Clock className="w-5 h-5 text-blue-600" />
                           <span className="text-sm font-medium text-blue-800">Daily Rate</span>
@@ -247,8 +242,22 @@ const VehicleDetailsPopup = ({ vehicle, isOpen, onClose }: VehicleDetailsPopupPr
                       </div>
                     )}
                     
-                    {vehicle.type === 'sale' && vehicle.salePrice > 0 && (
-                      <div className="bg-green-50 p-4 rounded-xl">
+                    {(vehicle.type === 'rental' || vehicle.type === 'both') && vehicle.weeklyRate > 0 && (
+                      <div className="bg-purple-50 p-4 rounded-xl border border-purple-100">
+                        <div className="flex items-center space-x-2 mb-2">
+                          <Calendar className="w-5 h-5 text-purple-600" />
+                          <span className="text-sm font-medium text-purple-800">Weekly Rate</span>
+                        </div>
+                        <p className="text-2xl font-bold text-purple-900">
+                          {formatPrice(vehicle.weeklyRate)}
+                        </p>
+                        <p className="text-xs text-purple-600">per week</p>
+                      </div>
+                    )}
+                    
+                    {/* Sale Pricing */}
+                    {(vehicle.type === 'sale' || vehicle.type === 'both') && vehicle.salePrice > 0 && (
+                      <div className="bg-green-50 p-4 rounded-xl border border-green-100">
                         <div className="flex items-center space-x-2 mb-2">
                           <DollarSign className="w-5 h-5 text-green-600" />
                           <span className="text-sm font-medium text-green-800">Sale Price</span>
@@ -264,8 +273,8 @@ const VehicleDetailsPopup = ({ vehicle, isOpen, onClose }: VehicleDetailsPopupPr
 
                 {/* Vehicle Details */}
                 <div className="mb-6">
-                  <h3 className="text-lg font-semibold text-gray-900 mb-4">Vehicle Details</h3>
-                  <div className="grid grid-cols-2 gap-4">
+                  <h3 className="text-lg font-semibold text-gray-900 mb-4">Vehicle Specifications</h3>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                     <div className="flex items-center space-x-3 p-3 bg-gray-50 rounded-lg">
                       <Calendar className="w-5 h-5 text-gray-600" />
                       <div>
@@ -293,10 +302,11 @@ const VehicleDetailsPopup = ({ vehicle, isOpen, onClose }: VehicleDetailsPopupPr
                     <div className="flex items-center space-x-3 p-3 bg-gray-50 rounded-lg">
                       <Fuel className="w-5 h-5 text-gray-600" />
                       <div>
-                        <p className="text-sm text-gray-600">Type</p>
+                        <p className="text-sm text-gray-600">Vehicle Type</p>
                         <p className="font-medium text-gray-900 capitalize">{vehicle.type}</p>
                       </div>
                     </div>
+                    
                   </div>
                 </div>
 
@@ -323,20 +333,43 @@ const VehicleDetailsPopup = ({ vehicle, isOpen, onClose }: VehicleDetailsPopupPr
                   </div>
                 )}
 
-                {/* Action Buttons */}
-                <div className="flex space-x-4 pt-4 border-t border-gray-200">
-                  {vehicle.type === 'rental' ? (
-                    <button className="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-medium py-3 px-6 rounded-xl transition-colors">
-                      Book Now
-                    </button>
-                  ) : (
-                    <button className="flex-1 bg-green-600 hover:bg-green-700 text-white font-medium py-3 px-6 rounded-xl transition-colors">
-                      Contact Seller
-                    </button>
-                  )}
-                  <button className="px-6 py-3 border border-gray-300 hover:bg-gray-50 text-gray-700 font-medium rounded-xl transition-colors">
-                    Save
-                  </button>
+                {/* Additional Vehicle Information */}
+                <div className="pt-4 border-t border-gray-200">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    {/* Vehicle Status */}
+                    <div className="flex items-center space-x-3 p-3 bg-gray-50 rounded-lg">
+                      <Shield className="w-5 h-5 text-gray-600" />
+                      <div>
+                        <p className="text-sm text-gray-600">Status</p>
+                        <p className="font-medium text-gray-900">
+                          {vehicle.isActive ? 'Available' : 'Unavailable'}
+                        </p>
+                      </div>
+                    </div>
+                    
+                    {/* Category Information */}
+                    {vehicle.category && (
+                      <div className="flex items-center space-x-3 p-3 bg-gray-50 rounded-lg">
+                        <Car className="w-5 h-5 text-gray-600" />
+                        <div>
+                          <p className="text-sm text-gray-600">Category</p>
+                          <p className="font-medium text-gray-900">{vehicle.category.name}</p>
+                        </div>
+                      </div>
+                    )}
+                    
+                    {/* Subcategory Information */}
+                    {vehicle.subcategory && (
+                      <div className="flex items-center space-x-3 p-3 bg-gray-50 rounded-lg">
+                        <Settings className="w-5 h-5 text-gray-600" />
+                        <div>
+                          <p className="text-sm text-gray-600">Subcategory</p>
+                          <p className="font-medium text-gray-900">{vehicle.subcategory.name}</p>
+                        </div>
+                      </div>
+                    )}
+                    
+                  </div>
                 </div>
               </div>
             </div>

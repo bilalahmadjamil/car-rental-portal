@@ -27,6 +27,7 @@ interface VehicleFormData {
   subcategoryId: string;
   type: 'rental' | 'sale' | 'both';
   dailyRate?: number;
+  weeklyRate?: number;
   salePrice?: number;
   description: string;
   features: string[];
@@ -53,6 +54,7 @@ const VehicleForms = ({ isOpen, onClose, type, editingItem, categories = [], onS
         subcategoryId: editingItem.subcategoryId || '',
         type: editingItem.type || 'rental',
         dailyRate: editingItem.dailyRate || '',
+        weeklyRate: editingItem.weeklyRate || '',
         salePrice: editingItem.salePrice || '',
         description: editingItem.description || '',
         features: editingItem.features || [],
@@ -92,6 +94,7 @@ const VehicleForms = ({ isOpen, onClose, type, editingItem, categories = [], onS
           subcategoryId: '',
           type: 'rental',
           dailyRate: '',
+          weeklyRate: '',
           salePrice: '',
           description: '',
           features: [],
@@ -121,6 +124,7 @@ const VehicleForms = ({ isOpen, onClose, type, editingItem, categories = [], onS
         subcategoryId: editingItem.subcategoryId || '',
         type: editingItem.type || 'rental',
         dailyRate: editingItem.dailyRate || '',
+        weeklyRate: editingItem.weeklyRate || '',
         salePrice: editingItem.salePrice || '',
         description: editingItem.description || '',
         features: (() => {
@@ -170,6 +174,7 @@ const VehicleForms = ({ isOpen, onClose, type, editingItem, categories = [], onS
             subcategoryId: '',
             type: 'rental',
             dailyRate: '',
+            weeklyRate: '',
             salePrice: '',
             description: '',
             features: [],
@@ -251,10 +256,11 @@ const VehicleForms = ({ isOpen, onClose, type, editingItem, categories = [], onS
         make: formData.make,
         model: formData.model,
         year: formData.year,
-        categoryId: formData.categoryId,
-        subcategoryId: formData.subcategoryId,
+        categoryId: formData.categoryId || undefined,
+        subcategoryId: formData.subcategoryId || undefined,
         type: formData.type,
         dailyRate: formData.dailyRate ? parseFloat(formData.dailyRate) : 0,
+        weeklyRate: formData.weeklyRate ? parseFloat(formData.weeklyRate) : 0,
         salePrice: formData.salePrice ? parseFloat(formData.salePrice) : 0,
         description: formData.description,
         features: formData.features || [],
@@ -268,9 +274,29 @@ const VehicleForms = ({ isOpen, onClose, type, editingItem, categories = [], onS
 
   const addFeature = () => {
     if (newFeature.trim()) {
+      // Check if the input looks like an array format
+      const trimmedFeature = newFeature.trim();
+      if (trimmedFeature.startsWith('[') && trimmedFeature.endsWith(']')) {
+        try {
+          // Parse the array and add each feature separately
+          const featuresArray = JSON.parse(trimmedFeature);
+          if (Array.isArray(featuresArray)) {
+            setFormData((prev: any) => ({
+              ...prev,
+              features: [...(prev.features || []), ...featuresArray.map(f => f.trim()).filter(f => f)]
+            }));
+            setNewFeature('');
+            return;
+          }
+        } catch (error) {
+          // If parsing fails, treat as regular input
+        }
+      }
+      
+      // Regular single feature addition
       setFormData((prev: any) => ({
         ...prev,
-        features: [...(prev.features || []), newFeature.trim()]
+        features: [...(prev.features || []), trimmedFeature]
       }));
       setNewFeature('');
     }
@@ -566,7 +592,7 @@ const VehicleForms = ({ isOpen, onClose, type, editingItem, categories = [], onS
                   required
                 />
               </div>
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">Daily Rate ($)</label>
                   <input
@@ -576,6 +602,19 @@ const VehicleForms = ({ isOpen, onClose, type, editingItem, categories = [], onS
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                     min="0"
                     step="0.01"
+                    placeholder="e.g., 50.00"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Weekly Rate ($)</label>
+                  <input
+                    type="number"
+                    value={formData.weeklyRate || ''}
+                    onChange={(e) => setFormData((prev: any) => ({ ...prev, weeklyRate: parseFloat(e.target.value) || 0 }))}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    min="0"
+                    step="0.01"
+                    placeholder="e.g., 300.00"
                   />
                 </div>
                 <div>
@@ -587,6 +626,7 @@ const VehicleForms = ({ isOpen, onClose, type, editingItem, categories = [], onS
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                     min="0"
                     step="0.01"
+                    placeholder="e.g., 25000.00"
                   />
                 </div>
               </div>
@@ -606,9 +646,14 @@ const VehicleForms = ({ isOpen, onClose, type, editingItem, categories = [], onS
                     type="text"
                     value={newFeature}
                     onChange={(e) => setNewFeature(e.target.value)}
-                    placeholder="Add a feature"
+                    placeholder='Add a feature or array: ["Feature1", "Feature2"]'
                     className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                    onKeyPress={(e) => e.key === 'Enter' && (e.preventDefault(), addFeature())}
+                    onKeyPress={(e) => {
+                      if (e.key === 'Enter') {
+                        e.preventDefault();
+                        addFeature();
+                      }
+                    }}
                   />
                   <button
                     type="button"
@@ -647,7 +692,12 @@ const VehicleForms = ({ isOpen, onClose, type, editingItem, categories = [], onS
                     onChange={(e) => setNewImage(e.target.value)}
                     placeholder="Enter image URL (e.g., https://example.com/image.jpg)"
                     className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                    onKeyPress={(e) => e.key === 'Enter' && (e.preventDefault(), addImage())}
+                    onKeyPress={(e) => {
+                      if (e.key === 'Enter') {
+                        e.preventDefault();
+                        addImage();
+                      }
+                    }}
                   />
                   <button
                     type="button"

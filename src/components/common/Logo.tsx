@@ -50,7 +50,7 @@ export default function Logo({
       
       {/* Logo Text */}
       {showText && (
-        <span className={`font-bold bg-gradient-to-r from-blue-600 to-blue-800 bg-clip-text text-transparent ${textSizes[size]}`}>
+        <span className={`font-bold bg-gradient-to-r from-amber-600 via-amber-700 to-amber-800 bg-clip-text text-transparent ${textSizes[size]}`}>
           AlifDrives
         </span>
       )}

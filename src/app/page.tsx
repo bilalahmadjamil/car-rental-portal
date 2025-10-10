@@ -12,7 +12,7 @@ export default function Home() {
     <main className="min-h-screen">
       <Navigation />
       <HeroSection />
-      <VehiclesSection />
+      <VehiclesSection removeTopPadding={true} />
       <ServicesSection />
       <AboutSection />
       <ContactSection />

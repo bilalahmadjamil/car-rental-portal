@@ -1,4 +1,8 @@
-const API_BASE_URL = 'https://car-rental-backend-production-d57f.up.railway.app/api/v1';
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
+
+if (!API_BASE_URL) {
+  throw new Error('NEXT_PUBLIC_API_URL environment variable is required. Please set it in your .env.local file.');
+}
 
 export interface ApiResponse<T = any> {
   data?: T;
@@ -9,7 +13,10 @@ export interface ApiResponse<T = any> {
 export class ApiClient {
   private baseURL: string;
 
-  constructor(baseURL: string = API_BASE_URL) {
+  constructor(baseURL: string = API_BASE_URL!) {
+    if (!baseURL) {
+      throw new Error('API base URL is required');
+    }
     this.baseURL = baseURL;
   }
 
@@ -66,6 +73,13 @@ export class ApiClient {
   async put<T>(endpoint: string, data?: any): Promise<ApiResponse<T>> {
     return this.request<T>(endpoint, {
       method: 'PUT',
+      body: data ? JSON.stringify(data) : undefined,
+    });
+  }
+
+  async patch<T>(endpoint: string, data?: any): Promise<ApiResponse<T>> {
+    return this.request<T>(endpoint, {
+      method: 'PATCH',
       body: data ? JSON.stringify(data) : undefined,
     });
   }

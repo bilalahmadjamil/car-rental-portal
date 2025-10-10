@@ -52,7 +52,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           }
         }
       } catch (error) {
-        console.error('Auth check failed:', error);
         logout();
       } finally {
         setIsLoading(false);
@@ -68,12 +67,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     localStorage.setItem('accessToken', data.accessToken);
     localStorage.setItem('refreshToken', data.refreshToken);
     
-    // Redirect based on user role
-    if (data.user.role === 'ADMIN' || data.user.role === 'SUPER_ADMIN') {
-      window.location.href = '/admin';
-    } else {
-      window.location.href = '/dashboard';
-    }
+    // Keep user on current page - no automatic navigation
   };
 
   const logout = () => {
@@ -98,7 +92,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       
       return true;
     } catch (error) {
-      console.error('Token refresh failed:', error);
       return false;
     }
   };

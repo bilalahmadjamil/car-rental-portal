@@ -40,6 +40,7 @@ interface Vehicle {
   subcategoryId: string;
   type: 'rental' | 'sale' | 'both';
   dailyRate?: number;
+  weeklyRate?: number;
   salePrice?: number;
   description: string;
   features: string[];
@@ -47,6 +48,19 @@ interface Vehicle {
   isActive: boolean;
   createdAt: string;
   updatedAt: string;
+  availability?: {
+    available: boolean;
+    reason?: string;
+    conflictingRentals?: Array<{
+      id: string;
+      startDate: string;
+      endDate: string;
+    }>;
+    conflictingSales?: Array<{
+      id: string;
+      status: string;
+    }>;
+  };
 }
 
 interface CreateCategoryDto {
@@ -124,7 +138,6 @@ class VehicleApiService {
         data,
       };
     } catch (error) {
-      console.error('API request failed:', error);
       if (error instanceof Error && error.name === 'AbortError') {
         return {
           success: false,
@@ -218,6 +231,8 @@ class VehicleApiService {
     search?: string;
     page?: number;
     limit?: number;
+    startDate?: string;
+    endDate?: string;
   }): Promise<ApiResponse<Vehicle[]>> {
     const params = new URLSearchParams();
     if (filters?.categoryId) params.append('categoryId', filters.categoryId.toString());
@@ -227,6 +242,8 @@ class VehicleApiService {
     if (filters?.search) params.append('search', filters.search);
     if (filters?.page) params.append('page', filters.page.toString());
     if (filters?.limit) params.append('limit', filters.limit.toString());
+    if (filters?.startDate) params.append('startDate', filters.startDate);
+    if (filters?.endDate) params.append('endDate', filters.endDate);
 
     const endpoint = params.toString() ? `${API_ENDPOINTS.VEHICLES}?${params.toString()}` : API_ENDPOINTS.VEHICLES;
     

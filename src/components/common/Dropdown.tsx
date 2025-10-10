@@ -58,6 +58,7 @@ const Dropdown = ({
   const [highlightedIndex, setHighlightedIndex] = useState(-1);
   const dropdownRef = useRef<HTMLDivElement>(null);
   const searchRef = useRef<HTMLInputElement>(null);
+  const optionsRef = useRef<HTMLDivElement>(null);
 
   // Filter options based on search query
   const filteredOptions = searchable && searchQuery
@@ -93,6 +94,20 @@ const Dropdown = ({
     document.addEventListener('mousedown', handleClickOutside);
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
+
+  // Scroll highlighted item into view
+  useEffect(() => {
+    if (highlightedIndex >= 0 && optionsRef.current) {
+      const highlightedElement = optionsRef.current.children[highlightedIndex] as HTMLElement;
+      if (highlightedElement) {
+        highlightedElement.scrollIntoView({
+          behavior: 'smooth',
+          block: 'nearest',
+          inline: 'nearest'
+        });
+      }
+    }
+  }, [highlightedIndex]);
 
   // Handle keyboard navigation
   const handleKeyDown = (e: React.KeyboardEvent) => {
@@ -185,7 +200,7 @@ const Dropdown = ({
   `.trim();
 
   return (
-    <div className="relative" ref={dropdownRef}>
+    <div className="relative z-50" ref={dropdownRef}>
       {/* Label */}
       {label && (
         <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -255,7 +270,7 @@ const Dropdown = ({
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: -10, scale: 0.95 }}
             transition={{ duration: 0.15, ease: 'easeOut' }}
-            className="absolute z-50 w-full mt-1 bg-white border border-gray-200 rounded-lg shadow-lg max-h-60 overflow-hidden"
+            className="absolute z-[9999] w-full mt-1 bg-white border border-gray-200 rounded-lg shadow-xl max-h-60 overflow-hidden"
           >
             {/* Search Input and Clear All */}
             {(searchable || (multiple && selectedValues.length > 0)) && (
@@ -291,13 +306,14 @@ const Dropdown = ({
             )}
 
             {/* Options List */}
-            <div className="max-h-48 overflow-y-auto">
+            <div ref={optionsRef} className="max-h-48 overflow-y-auto scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100">
               {filteredOptions.length === 0 ? (
                 <div className="px-4 py-3 text-sm text-gray-500 text-center">
                   {emptyMessage}
                 </div>
               ) : (
-                filteredOptions.map((option, index) => (
+                <div className="pb-2">
+                  {filteredOptions.map((option, index) => (
                   <motion.div
                     key={option.value}
                     initial={{ opacity: 0, x: -10 }}
@@ -353,7 +369,8 @@ const Dropdown = ({
                       )
                     )}
                   </motion.div>
-                ))
+                  ))}
+                </div>
               )}
             </div>
           </motion.div>

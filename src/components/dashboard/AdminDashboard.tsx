@@ -1,79 +1,197 @@
 'use client';
 
+import { useState, useEffect, useCallback, useMemo } from 'react';
 import { motion } from 'framer-motion';
-import { Users, Car, Calendar, DollarSign, TrendingUp, AlertCircle, CheckCircle, Clock, Star } from 'lucide-react';
+import { Users, Car, Calendar, DollarSign, AlertCircle, CheckCircle, Clock, Star, TrendingUp } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
+import { apiClient } from '../../utils/api';
+
+interface DashboardStats {
+  totalUsers: { value: number; change: string };
+  activeVehicles: { value: number; change: string };
+  monthlyBookings: { value: number; change: string };
+  monthlyRevenue: { value: number; change: string };
+}
+
+interface RecentBooking {
+  id: string;
+  customer: string;
+  vehicle: string;
+  startDate: string;
+  endDate: string;
+  status: string;
+  amount: string;
+}
+
+interface DashboardData {
+  stats: DashboardStats;
+  recentBookings: RecentBooking[];
+}
+
+// Static data - moved outside component to avoid recreation
+const QUICK_ACTIONS = [
+  { title: 'Manage Vehicles', description: 'Add, edit, or remove vehicles', icon: Car, href: '/dashboard/vehicles', color: 'blue' },
+  { title: 'Manage Bookings', description: 'View and manage all bookings', icon: Calendar, href: '/dashboard/bookings', color: 'green' },
+  { title: 'User Management', description: 'Manage customer accounts', icon: Users, href: '/dashboard/users', color: 'purple' },
+  { title: 'Analytics', description: 'View detailed analytics', icon: TrendingUp, href: '/dashboard/analytics', color: 'orange' }
+];
+
+const ALERTS = [
+  { type: 'warning', message: '3 vehicles need maintenance', icon: AlertCircle },
+  { type: 'info', message: 'New booking request from premium customer', icon: Calendar },
+  { type: 'success', message: 'Monthly revenue target achieved', icon: CheckCircle }
+];
+
+// Utility functions - moved outside component
+const getStatusColor = (status: string) => {
+  switch (status) {
+    case 'Active': return 'bg-green-100 text-green-800';
+    case 'Pending': return 'bg-yellow-100 text-yellow-800';
+    case 'Completed': return 'bg-blue-100 text-blue-800';
+    default: return 'bg-gray-100 text-gray-800';
+  }
+};
+
+const getAlertColor = (type: string) => {
+  switch (type) {
+    case 'warning': return 'bg-yellow-50 border-yellow-200 text-yellow-800';
+    case 'info': return 'bg-blue-50 border-blue-200 text-blue-800';
+    case 'success': return 'bg-green-50 border-green-200 text-green-800';
+    default: return 'bg-gray-50 border-gray-200 text-gray-800';
+  }
+};
 
 const AdminDashboard = () => {
   const { user } = useAuth();
+  const [dashboardData, setDashboardData] = useState<DashboardData | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
-  const stats = [
-    { label: 'Total Users', value: '1,247', icon: Users, color: 'blue', change: '+12%' },
-    { label: 'Active Vehicles', value: '89', icon: Car, color: 'green', change: '+5%' },
-    { label: 'Monthly Bookings', value: '156', icon: Calendar, color: 'purple', change: '+23%' },
-    { label: 'Monthly Revenue', value: '$45,230', icon: DollarSign, color: 'orange', change: '+18%' }
-  ];
-
-  const recentBookings = [
-    {
-      id: 'BK001',
-      customer: 'John Smith',
-      vehicle: 'Toyota Camry 2023',
-      startDate: '2024-01-15',
-      endDate: '2024-01-20',
-      status: 'Active',
-      amount: '$450'
-    },
-    {
-      id: 'BK002',
-      customer: 'Sarah Johnson',
-      vehicle: 'BMW X5 2023',
-      startDate: '2024-01-14',
-      endDate: '2024-01-18',
-      status: 'Pending',
-      amount: '$520'
-    },
-    {
-      id: 'BK003',
-      customer: 'Mike Wilson',
-      vehicle: 'Mercedes C-Class 2023',
-      startDate: '2024-01-13',
-      endDate: '2024-01-16',
-      status: 'Completed',
-      amount: '$380'
+  // Fetch dashboard data
+  const fetchDashboardData = useCallback(async () => {
+    try {
+      setLoading(true);
+      setError(null);
+      
+      const response = await apiClient.get('/bookings/admin/dashboard-stats');
+      
+      if (response.success) {
+        setDashboardData(response.data as DashboardData);
+      } else {
+        setError('Failed to fetch dashboard data');
+      }
+    } catch (err) {
+      setError('Failed to fetch dashboard data');
+    } finally {
+      setLoading(false);
     }
-  ];
+  }, []);
 
-  const quickActions = [
-    { title: 'Manage Vehicles', description: 'Add, edit, or remove vehicles', icon: Car, href: '/dashboard/vehicles', color: 'blue' },
-    { title: 'Manage Bookings', description: 'View and manage all bookings', icon: Calendar, href: '/dashboard/bookings', color: 'green' },
-    { title: 'User Management', description: 'Manage customer accounts', icon: Users, href: '/dashboard/users', color: 'purple' },
-    { title: 'Analytics', description: 'View detailed analytics', icon: TrendingUp, href: '/dashboard/analytics', color: 'orange' }
-  ];
+  useEffect(() => {
+    fetchDashboardData();
+  }, [fetchDashboardData]);
 
-  const alerts = [
-    { type: 'warning', message: '3 vehicles need maintenance', icon: AlertCircle },
-    { type: 'info', message: 'New booking request from premium customer', icon: Calendar },
-    { type: 'success', message: 'Monthly revenue target achieved', icon: CheckCircle }
-  ];
-
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case 'Active': return 'bg-green-100 text-green-800';
-      case 'Pending': return 'bg-yellow-100 text-yellow-800';
-      case 'Completed': return 'bg-blue-100 text-blue-800';
-      default: return 'bg-gray-100 text-gray-800';
-    }
+  // Helper function to safely get stat value
+  const getStatValue = (stat: any, prefix = '') => {
+    const value = stat?.value?.toLocaleString() || '0';
+    return prefix ? `${prefix}${value}` : value;
   };
 
-  const getAlertColor = (type: string) => {
-    switch (type) {
-      case 'warning': return 'bg-yellow-50 border-yellow-200 text-yellow-800';
-      case 'info': return 'bg-blue-50 border-blue-200 text-blue-800';
-      case 'success': return 'bg-green-50 border-green-200 text-green-800';
-      default: return 'bg-gray-50 border-gray-200 text-gray-800';
-    }
-  };
+  // Memoized stats configuration
+  const statsConfig = useMemo(() => {
+    const stats = dashboardData?.stats;
+    return [
+      { 
+        label: 'Total Users', 
+        value: getStatValue(stats?.totalUsers), 
+        icon: Users, 
+        color: 'blue', 
+        change: stats?.totalUsers?.change || '+0%' 
+      },
+      { 
+        label: 'Active Vehicles', 
+        value: getStatValue(stats?.activeVehicles), 
+        icon: Car, 
+        color: 'green', 
+        change: stats?.activeVehicles?.change || '+0%' 
+      },
+      { 
+        label: 'Monthly Bookings', 
+        value: getStatValue(stats?.monthlyBookings), 
+        icon: Calendar, 
+        color: 'purple', 
+        change: stats?.monthlyBookings?.change || '+0%' 
+      },
+      { 
+        label: 'Monthly Revenue', 
+        value: getStatValue(stats?.monthlyRevenue, '$'), 
+        icon: DollarSign, 
+        color: 'orange', 
+        change: stats?.monthlyRevenue?.change || '+0%' 
+      }
+    ];
+  }, [dashboardData]);
+
+  const recentBookings = dashboardData?.recentBookings || [];
+
+  if (loading) {
+    return (
+      <div className="space-y-8">
+        <div className="bg-gradient-to-r from-purple-600 to-blue-800 rounded-2xl p-8 text-white">
+          <h1 className="text-3xl font-bold mb-2">
+            Welcome back, {user?.firstName}! 👋
+          </h1>
+          <p className="text-purple-100 text-lg">
+            Loading your AlifDrives admin dashboard...
+          </p>
+        </div>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+          {[1, 2, 3, 4].map((i) => (
+            <div key={i} className="bg-white rounded-xl p-6 shadow-lg border border-gray-100 animate-pulse">
+              <div className="flex items-center justify-between">
+                <div className="space-y-2">
+                  <div className="h-4 bg-gray-200 rounded w-24"></div>
+                  <div className="h-8 bg-gray-200 rounded w-16"></div>
+                  <div className="h-3 bg-gray-200 rounded w-12"></div>
+                </div>
+                <div className="w-12 h-12 bg-gray-200 rounded-lg"></div>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="space-y-8">
+        <div className="bg-gradient-to-r from-purple-600 to-blue-800 rounded-2xl p-8 text-white">
+          <h1 className="text-3xl font-bold mb-2">
+            Welcome back, {user?.firstName}! 👋
+          </h1>
+          <p className="text-purple-100 text-lg">
+            Here&apos;s your AlifDrives admin dashboard overview
+          </p>
+        </div>
+        <div className="bg-red-50 border border-red-200 rounded-xl p-6">
+          <div className="flex items-center space-x-3">
+            <AlertCircle className="w-6 h-6 text-red-600" />
+            <div>
+              <h3 className="text-lg font-medium text-red-800">Error Loading Dashboard</h3>
+              <p className="text-red-600">{error}</p>
+              <button 
+                onClick={fetchDashboardData}
+                className="mt-2 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors"
+              >
+                Try Again
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-8">
@@ -93,7 +211,7 @@ const AdminDashboard = () => {
 
       {/* Stats Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        {stats.map((stat, index) => (
+        {statsConfig.map((stat, index) => (
           <motion.div
             key={stat.label}
             initial={{ opacity: 0, y: 20 }}
@@ -173,7 +291,7 @@ const AdminDashboard = () => {
         >
           <h2 className="text-xl font-bold text-gray-900 mb-6">Quick Actions</h2>
           <div className="space-y-4">
-            {quickActions.map((action, index) => (
+                     {QUICK_ACTIONS.map((action, index) => (
               <motion.a
                 key={action.title}
                 href={action.href}
@@ -209,7 +327,7 @@ const AdminDashboard = () => {
       >
         <h2 className="text-xl font-bold text-gray-900 mb-6">System Alerts</h2>
         <div className="space-y-4">
-          {alerts.map((alert, index) => (
+                   {ALERTS.map((alert, index) => (
             <motion.div
               key={index}
               initial={{ opacity: 0, x: -20 }}

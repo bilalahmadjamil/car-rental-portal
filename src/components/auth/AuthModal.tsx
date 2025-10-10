@@ -53,7 +53,7 @@ export default function AuthModal({ isOpen, onClose, onSuccess, initialMode = 'l
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         exit={{ opacity: 0 }}
-        className="fixed inset-0 z-[9999] bg-black/50 backdrop-blur-sm overflow-y-auto"
+        className="fixed inset-0 z-[9999] backdrop-blur-md bg-black/30 overflow-y-auto"
         onClick={onClose}
         style={{ 
           display: 'flex', 

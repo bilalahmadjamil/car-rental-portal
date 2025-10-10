@@ -18,7 +18,7 @@ interface VehiclesSectionProps {
 }
 
 const VehiclesSection = ({ showAllOption = false, removeTopPadding = false, hideCallToAction = false, enablePagination = false, showLogo = false }: VehiclesSectionProps) => {
-  const [activeTab, setActiveTab] = useState<'rental' | 'sale' | 'both'>(showAllOption ? 'both' : 'rental');
+  const [activeTab, setActiveTab] = useState<'rental' | 'sale' | 'both'>(showAllOption ? 'both' : 'both');
   const baseStyling = getSectionStyling('vehicles');
   const styling = removeTopPadding ? {
     ...baseStyling,
@@ -47,60 +47,20 @@ const VehiclesSection = ({ showAllOption = false, removeTopPadding = false, hide
           />
           {/* Multiple gradient overlays for depth */}
           <div className="absolute inset-0 bg-gradient-to-br from-blue-900/20 via-transparent to-blue-800/30"></div>
-          <div className="absolute inset-0 bg-gradient-to-t from-white/85 via-white/70 to-white/60"></div>
-          <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/40 to-transparent"></div>
+          <div className="absolute inset-0 bg-gradient-to-t from-white/90 via-white/80 to-white/70"></div>
+          <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/30 to-transparent"></div>
+          {/* Top gradient for smooth transition from hero */}
+          <div className="absolute top-0 left-0 right-0 h-24 bg-gradient-to-b from-white/95 via-white/80 to-transparent"></div>
         </div>
         
-        {/* Enhanced background decorative elements */}
+        {/* Simplified background decorative elements */}
         <div className="absolute inset-0 overflow-hidden">
-          {/* Primary floating element */}
-          <motion.div 
-            className="absolute -top-40 -right-40 w-80 h-80 rounded-full mix-blend-multiply filter blur-xl opacity-40 bg-gradient-to-br from-blue-400 to-blue-600"
-            animate={{ 
-              scale: [1, 1.1, 1],
-              rotate: [0, 180, 360],
-              x: [0, 20, 0],
-              y: [0, -10, 0]
-            }}
-            transition={{ 
-              duration: 20, 
-              repeat: Infinity, 
-              ease: "linear" 
-            }}
-          />
-          {/* Secondary floating element */}
-          <motion.div 
-            className="absolute -bottom-40 -left-40 w-96 h-96 rounded-full mix-blend-multiply filter blur-xl opacity-30 bg-gradient-to-tr from-green-400 to-blue-500"
-            animate={{ 
-              scale: [1, 1.2, 1],
-              rotate: [360, 180, 0],
-              x: [0, -15, 0],
-              y: [0, 10, 0]
-            }}
-            transition={{ 
-              duration: 25, 
-              repeat: Infinity, 
-              ease: "linear" 
-            }}
-          />
-          {/* Tertiary floating element */}
-          <motion.div 
-            className="absolute top-1/2 left-1/2 w-64 h-64 rounded-full mix-blend-multiply filter blur-2xl opacity-20 bg-gradient-to-br from-purple-400 to-pink-500"
-            animate={{ 
-              scale: [0.8, 1.3, 0.8],
-              rotate: [0, 360, 0],
-              x: [-20, 20, -20],
-              y: [-10, 10, -10]
-            }}
-            transition={{ 
-              duration: 30, 
-              repeat: Infinity, 
-              ease: "easeInOut" 
-            }}
-          />
+          {/* Static decorative elements - no heavy animations */}
+          <div className="absolute -top-40 -right-40 w-80 h-80 rounded-full mix-blend-multiply filter blur-xl opacity-20 bg-gradient-to-br from-blue-400 to-blue-600" />
+          <div className="absolute -bottom-40 -left-40 w-96 h-96 rounded-full mix-blend-multiply filter blur-xl opacity-15 bg-gradient-to-tr from-green-400 to-blue-500" />
         </div>
 
-        <div className="container mx-auto px-4 py-8 relative z-10">
+        <div className="container mx-auto px-4 py-12 relative z-10">
           <motion.div 
             className="text-center mb-6"
             variants={containerVariants}
@@ -169,9 +129,11 @@ const VehiclesSection = ({ showAllOption = false, removeTopPadding = false, hide
             viewport={{ once: true }}
           >
             <VehicleDisplay 
+              key={activeTab}
               type={activeTab}
               showFilters={true}
               enablePagination={enablePagination}
+              limit={showAllOption ? undefined : 6}
             />
           </motion.div>
 

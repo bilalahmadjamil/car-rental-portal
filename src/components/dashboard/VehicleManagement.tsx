@@ -21,13 +21,16 @@ import {
   ToggleLeft,
   ToggleRight,
   Power,
-  PowerOff
+  PowerOff,
+  X
 } from 'lucide-react';
 import VehicleForms from './VehicleForms';
 import VehicleCard from '../common/VehicleCard';
 import ToggleSwitch from '../common/ToggleSwitch';
+import Dropdown from '../common/Dropdown';
 import { useVehicles } from '../../contexts/VehicleContext';
 import { useConfirmation } from '../../hooks/useConfirmation';
+import { apiClient } from '../../utils/api';
 
 interface Category {
   id: string;
@@ -57,6 +60,7 @@ interface Vehicle {
   subcategoryId: string;
   type: 'rental' | 'sale' | 'both';
   dailyRate?: number;
+  weeklyRate?: number;
   salePrice?: number;
   description: string;
   features: string[];
@@ -68,6 +72,8 @@ interface Vehicle {
 const VehicleManagement = () => {
   const [activeTab, setActiveTab] = useState<'categories' | 'subcategories' | 'vehicles'>('categories');
   const [searchTerm, setSearchTerm] = useState('');
+  const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
+  const [selectedSubcategory, setSelectedSubcategory] = useState<string | null>(null);
   const [showForm, setShowForm] = useState(false);
   const [editingItem, setEditingItem] = useState<any>(null);
   const [viewMode, setViewMode] = useState<'list' | 'card'>('list');
@@ -75,6 +81,7 @@ const VehicleManagement = () => {
   const [itemsPerPage, setItemsPerPage] = useState(10);
   const [totalPages, setTotalPages] = useState(1);
   const [totalItems, setTotalItems] = useState(0);
+  const [paginatedVehicles, setPaginatedVehicles] = useState<any[]>([]);
 
   const {
     categories,
@@ -107,20 +114,37 @@ const VehicleManagement = () => {
   // Fetch vehicles with pagination
   const fetchVehiclesWithPagination = async (page: number = 1, limit: number = itemsPerPage) => {
     try {
-      await fetchVehicles({
-        page,
-        limit,
-        search: searchTerm || undefined,
-        isActive: true
+      // Build query parameters
+      const params = new URLSearchParams({
+        page: page.toString(),
+        limit: limit.toString(),
+        isActive: 'true'
       });
       
-      // Note: The context will handle updating vehicles state
-      // We'll need to get pagination info from the context or API response
-      // For now, we'll use the vehicles from context and calculate pagination
-      setTotalItems(vehicles.length);
-      setTotalPages(Math.ceil(vehicles.length / itemsPerPage));
+      // Add search filter
+      if (searchTerm) {
+        params.append('search', searchTerm);
+      }
+      
+      // Add category filter
+      if (selectedCategory) {
+        params.append('categoryId', selectedCategory);
+      }
+      
+      // Add subcategory filter
+      if (selectedSubcategory) {
+        params.append('subcategoryId', selectedSubcategory);
+      }
+      
+      const response = await apiClient.get(`/vehicles?${params.toString()}`);
+      
+      if (response.success && response.data) {
+        const data = response.data as any;
+        setTotalItems(data.pagination?.totalCount || data.data.length);
+        setTotalPages(data.pagination?.totalPages || Math.ceil(data.data.length / limit));
+        setPaginatedVehicles(data.data);
+      }
     } catch (error) {
-      console.error('Error fetching vehicles:', error);
     }
   };
 
@@ -129,19 +153,26 @@ const VehicleManagement = () => {
     refreshData();
   }, []);
 
-  // Fetch vehicles with pagination when vehicles tab is active or page/search changes
+  // Initial fetch for vehicles when vehicles tab is active
   useEffect(() => {
     if (activeTab === 'vehicles') {
-      // If we don't have vehicles loaded yet, or if search/page changed, fetch with pagination
-      if (vehicles.length === 0 || searchTerm) {
-        fetchVehiclesWithPagination(currentPage, itemsPerPage);
-      } else {
-        // If we already have vehicles loaded, just update pagination info
-        setTotalItems(vehicles.length);
-        setTotalPages(Math.ceil(vehicles.length / itemsPerPage));
-      }
+      fetchVehiclesWithPagination(currentPage, itemsPerPage);
     }
-  }, [activeTab, currentPage, itemsPerPage, searchTerm]);
+  }, [activeTab]);
+
+  // Reset to page 1 when filters change
+  useEffect(() => {
+    if (activeTab === 'vehicles' && (searchTerm || selectedCategory || selectedSubcategory)) {
+      setCurrentPage(1);
+    }
+  }, [searchTerm, selectedCategory, selectedSubcategory, activeTab]);
+
+  // Fetch vehicles with pagination when vehicles tab is active or page/filters change
+  useEffect(() => {
+    if (activeTab === 'vehicles') {
+      fetchVehiclesWithPagination(currentPage, itemsPerPage);
+    }
+  }, [activeTab, currentPage, itemsPerPage, searchTerm, selectedCategory, selectedSubcategory]);
 
   const getFilteredData = (): any[] => {
     const filtered = searchTerm.toLowerCase();
@@ -160,14 +191,36 @@ const VehicleManagement = () => {
           sub.categoryName.toLowerCase().includes(filtered)
         );
       case 'vehicles':
-        // For vehicles, we now use server-side pagination, so return vehicles directly
-        return vehicles;
+        // For vehicles, we now use server-side pagination, so return paginated vehicles
+        return paginatedVehicles;
       default:
         return [];
     }
   };
 
   const { confirmDelete } = useConfirmation();
+
+  // Get subcategories for selected category
+  const getSubcategories = () => {
+    const category = categories.find(cat => cat.id === selectedCategory);
+    return category?.subcategories || [];
+  };
+
+  // Reset subcategory when category changes
+  useEffect(() => {
+    setSelectedSubcategory(null);
+  }, [selectedCategory]);
+
+  // Reset search and pagination
+  const resetSearch = () => {
+    setSearchTerm('');
+    setSelectedCategory(null);
+    setSelectedSubcategory(null);
+    setCurrentPage(1);
+    setTotalPages(1);
+    setTotalItems(0);
+    setPaginatedVehicles([]);
+  };
 
   const handleDelete = async (type: string, id: string, name?: string) => {
     const itemName = name || type;
@@ -187,7 +240,6 @@ const VehicleManagement = () => {
             break;
         }
       } catch (err) {
-        console.error('Failed to delete:', err);
       }
     }
   };
@@ -206,7 +258,6 @@ const VehicleManagement = () => {
           break;
       }
     } catch (err) {
-      console.error('Failed to toggle status:', err);
     }
   };
 
@@ -242,7 +293,6 @@ const VehicleManagement = () => {
       setShowForm(false);
       setEditingItem(null);
     } catch (err) {
-      console.error('Failed to save:', err);
     }
   };
 
@@ -334,7 +384,7 @@ const VehicleManagement = () => {
       </div>
 
       {/* Search and Filters */}
-      <div className="flex flex-col sm:flex-row gap-4">
+      <div className="flex flex-col sm:flex-row gap-4 relative z-10">
         <div className="relative flex-1">
           <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
           <input
@@ -342,38 +392,79 @@ const VehicleManagement = () => {
             placeholder={`Search ${activeTab}...`}
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            className="w-full pl-10 pr-10 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
           />
-        </div>
-        <div className="flex gap-2">
-          {activeTab === 'vehicles' && (
-            <div className="flex border border-gray-300 rounded-lg overflow-hidden">
-              <button
-                onClick={() => setViewMode('list')}
-                className={`px-3 py-2 text-sm font-medium transition-colors ${
-                  viewMode === 'list'
-                    ? 'bg-blue-600 text-white'
-                    : 'bg-white text-gray-700 hover:bg-gray-50'
-                }`}
-              >
-                <List className="w-4 h-4" />
-              </button>
-              <button
-                onClick={() => setViewMode('card')}
-                className={`px-3 py-2 text-sm font-medium transition-colors ${
-                  viewMode === 'card'
-                    ? 'bg-blue-600 text-white'
-                    : 'bg-white text-gray-700 hover:bg-gray-50'
-                }`}
-              >
-                <Grid3X3 className="w-4 h-4" />
-              </button>
-            </div>
+          {searchTerm && (
+            <button
+              onClick={resetSearch}
+              className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
+              title="Clear search"
+            >
+              <X className="w-4 h-4" />
+            </button>
           )}
-          <button className="inline-flex items-center px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50">
-            <Filter className="w-4 h-4 mr-2" />
-            Filters
-          </button>
+        </div>
+        <div className="flex flex-col sm:flex-row gap-2">
+          {activeTab === 'vehicles' && (
+            <>
+              {/* Category Filter */}
+              <Dropdown
+                options={[
+                  { value: '', label: 'All Categories' },
+                  ...categories.filter(cat => cat.isActive).map(category => ({
+                    value: category.id,
+                    label: category.name
+                  }))
+                ]}
+                value={selectedCategory || ''}
+                onChange={(value) => setSelectedCategory(value as string || null)}
+                placeholder="All Categories"
+                size="sm"
+                className="min-w-[150px]"
+              />
+
+              {/* Subcategory Filter */}
+              <Dropdown
+                options={[
+                  { value: '', label: 'All Subcategories' },
+                  ...getSubcategories().map(subcategory => ({
+                    value: subcategory.id,
+                    label: subcategory.name
+                  }))
+                ]}
+                value={selectedSubcategory || ''}
+                onChange={(value) => setSelectedSubcategory(value as string || null)}
+                placeholder={getSubcategories().length === 0 ? "No subcategories" : "All Subcategories"}
+                size="sm"
+                className="min-w-[150px]"
+                disabled={!selectedCategory}
+              />
+
+              {/* View Mode Toggle */}
+              <div className="flex border border-gray-300 rounded-lg overflow-hidden">
+                <button
+                  onClick={() => setViewMode('list')}
+                  className={`px-3 py-2 text-sm font-medium transition-colors ${
+                    viewMode === 'list'
+                      ? 'bg-blue-600 text-white'
+                      : 'bg-white text-gray-700 hover:bg-gray-50'
+                  }`}
+                >
+                  <List className="w-4 h-4" />
+                </button>
+                <button
+                  onClick={() => setViewMode('card')}
+                  className={`px-3 py-2 text-sm font-medium transition-colors ${
+                    viewMode === 'card'
+                      ? 'bg-blue-600 text-white'
+                      : 'bg-white text-gray-700 hover:bg-gray-50'
+                  }`}
+                >
+                  <Grid3X3 className="w-4 h-4" />
+                </button>
+              </div>
+            </>
+          )}
         </div>
       </div>
 
@@ -381,51 +472,47 @@ const VehicleManagement = () => {
       <div className="bg-white rounded-lg shadow">
         {activeTab === 'categories' && (
           <div className="p-6">
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div className="space-y-4">
               {getFilteredData().map((category: Category) => (
                 <motion.div
                   key={category.id}
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
-                  className="border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow"
+                  className="flex items-center justify-between p-4 border border-gray-200 rounded-lg hover:shadow-md transition-shadow"
                 >
-                  <div className="flex items-start justify-between">
-                    <div className="flex items-center space-x-3">
-                      <div className={`w-10 h-10 rounded-lg bg-${category.color}-100 flex items-center justify-center`}>
-                        <Car className={`w-5 h-5 text-${category.color}-600`} />
-                      </div>
+                  <div className="flex items-center space-x-4">
+                    <div className={`w-10 h-10 rounded-lg bg-${category.color}-100 flex items-center justify-center`}>
+                      <Car className={`w-5 h-5 text-${category.color}-600`} />
+                    </div>
                     <div>
                       <h3 className="font-medium text-gray-900">{category.name}</h3>
                       <p className="text-sm text-gray-500 truncate max-w-xs" title={category.description}>
                         {category.description}
                       </p>
-                      <p className="text-xs text-gray-400 mt-1">
-                        {category.subcategories.length} subcategories
-                      </p>
+                      <p className="text-xs text-gray-400">{category.subcategories.length} subcategories</p>
                     </div>
-                    </div>
-                    <div className="flex items-center space-x-3">
-                      <ToggleSwitch
-                        checked={category.isActive}
-                        onChange={() => handleToggleActive('category', category.id)}
-                        size="sm"
-                        showLabel={false}
-                      />
-                      <button
-                        onClick={() => handleEdit(category)}
-                        className="p-1 text-blue-600 hover:bg-blue-50 rounded transition-colors"
-                        title="Edit category"
-                      >
-                        <Edit className="w-4 h-4" />
-                      </button>
-                      <button
-                        onClick={() => handleDelete('category', category.id, category.name)}
-                        className="p-1 text-red-600 hover:bg-red-50 rounded transition-colors"
-                        title="Delete category"
-                      >
-                        <Trash2 className="w-4 h-4" />
-                      </button>
-                    </div>
+                  </div>
+                  <div className="flex items-center space-x-3">
+                    <ToggleSwitch
+                      checked={category.isActive}
+                      onChange={() => handleToggleActive('category', category.id)}
+                      size="sm"
+                      showLabel={false}
+                    />
+                    <button
+                      onClick={() => handleEdit(category)}
+                      className="p-1 text-blue-600 hover:bg-blue-50 rounded transition-colors"
+                      title="Edit category"
+                    >
+                      <Edit className="w-4 h-4" />
+                    </button>
+                    <button
+                      onClick={() => handleDelete('category', category.id, category.name)}
+                      className="p-1 text-red-600 hover:bg-red-50 rounded transition-colors"
+                      title="Delete category"
+                    >
+                      <Trash2 className="w-4 h-4" />
+                    </button>
                   </div>
                 </motion.div>
               ))}
@@ -552,6 +639,7 @@ const VehicleManagement = () => {
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                           {vehicle.dailyRate && <div>${vehicle.dailyRate}/day</div>}
+                          {vehicle.weeklyRate && <div className="text-xs text-gray-600">${vehicle.weeklyRate}/week</div>}
                           {vehicle.salePrice && <div>${vehicle.salePrice} sale</div>}
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap">
@@ -609,24 +697,55 @@ const VehicleManagement = () => {
             
             {/* Pagination Controls - Only for vehicles tab */}
             {activeTab === 'vehicles' && totalPages > 1 && (
-              <div className="mt-6 flex items-center justify-between border-t border-gray-200 bg-white px-4 py-3 sm:px-6">
-                <div className="flex flex-1 justify-between sm:hidden">
+              <div className="mt-6 flex items-center justify-between border-t border-gray-200 bg-white px-4 py-3 sm:px-6 rounded-lg shadow-sm">
+                <div className="flex flex-1 justify-between md:hidden">
                   <button
                     onClick={() => setCurrentPage(Math.max(1, currentPage - 1))}
                     disabled={currentPage === 1}
-                    className="relative inline-flex items-center rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="relative inline-flex items-center rounded-md border border-gray-300 bg-white px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
                   >
                     Previous
                   </button>
+                  <div className="flex items-center">
+                    <span className="text-sm text-gray-700">
+                      Page {currentPage} of {totalPages}
+                    </span>
+                  </div>
                   <button
                     onClick={() => setCurrentPage(Math.min(totalPages, currentPage + 1))}
                     disabled={currentPage === totalPages}
-                    className="relative ml-3 inline-flex items-center rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="relative inline-flex items-center rounded-md border border-gray-300 bg-white px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
                   >
                     Next
                   </button>
                 </div>
-                <div className="hidden sm:flex sm:flex-1 sm:items-center sm:justify-between">
+                
+                {/* Medium screen (tablet) pagination */}
+                <div className="hidden sm:flex md:hidden flex-1 items-center justify-between">
+                  <div>
+                    <p className="text-sm text-gray-700">
+                      Page {currentPage} of {totalPages}
+                    </p>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <button
+                      onClick={() => setCurrentPage(Math.max(1, currentPage - 1))}
+                      disabled={currentPage === 1}
+                      className="relative inline-flex items-center rounded-md border border-gray-300 bg-white px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                      Previous
+                    </button>
+                    <button
+                      onClick={() => setCurrentPage(Math.min(totalPages, currentPage + 1))}
+                      disabled={currentPage === totalPages}
+                      className="relative inline-flex items-center rounded-md border border-gray-300 bg-white px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                      Next
+                    </button>
+                  </div>
+                </div>
+                
+                <div className="hidden md:flex md:flex-1 md:items-center md:justify-between">
                   <div>
                     <p className="text-sm text-gray-700">
                       Showing{' '}
@@ -640,7 +759,7 @@ const VehicleManagement = () => {
                       {' '}results
                     </p>
                   </div>
-                  <div className="flex items-center space-x-2">
+                  <div className="flex flex-col sm:flex-row items-center space-y-2 sm:space-y-0 sm:space-x-2">
                     <div className="flex items-center space-x-1">
                       <label htmlFor="items-per-page" className="text-sm text-gray-700">
                         Show:
@@ -652,7 +771,7 @@ const VehicleManagement = () => {
                           setItemsPerPage(Number(e.target.value));
                           setCurrentPage(1);
                         }}
-                        className="rounded-md border-gray-300 text-sm focus:border-blue-500 focus:ring-blue-500"
+                        className="rounded-md border-gray-300 text-sm focus:border-blue-500 focus:ring-blue-500 min-w-[60px]"
                       >
                         <option value={5}>5</option>
                         <option value={10}>10</option>
@@ -692,7 +811,7 @@ const VehicleManagement = () => {
                           <button
                             key={pageNum}
                             onClick={() => setCurrentPage(pageNum)}
-                            className={`relative inline-flex items-center px-4 py-2 text-sm font-semibold ${
+                            className={`relative inline-flex items-center px-3 py-2 text-sm font-semibold ${
                               pageNum === currentPage
                                 ? 'z-10 bg-blue-600 text-white focus:z-20 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600'
                                 : 'text-gray-900 ring-1 ring-inset ring-gray-300 hover:bg-gray-50 focus:z-20 focus:outline-offset-0'

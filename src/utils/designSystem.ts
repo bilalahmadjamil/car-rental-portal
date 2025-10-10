@@ -41,51 +41,50 @@ export const designSystem = {
   
   // Card styling
   card: {
-    base: "bg-white rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-500 group border border-gray-100 relative overflow-hidden",
+    base: "bg-white rounded-2xl shadow-lg hover:shadow-xl transition-shadow duration-200 group border border-gray-100 relative overflow-hidden",
     padding: "p-8",
-    hover: "hover:scale-1.02 hover:-translate-y-2"
+    hover: "hover:scale-1.01"
   },
   
   // Button styling
   buttons: {
-    primary: "bg-gradient-to-r from-blue-600 to-blue-700 text-white px-8 py-4 rounded-xl font-semibold text-lg shadow-lg hover:shadow-xl transition-all duration-300",
-    secondary: "border-2 border-blue-600 text-blue-700 px-8 py-4 rounded-xl font-semibold text-lg hover:bg-blue-50 transition-all duration-300",
-    cta: "bg-gradient-to-r from-blue-600 to-blue-700 text-white py-3 px-6 rounded-xl font-semibold text-lg shadow-lg hover:shadow-xl transition-all duration-300"
+    primary: "bg-gradient-to-r from-blue-600 to-blue-700 text-white px-8 py-4 rounded-xl font-semibold text-lg shadow-lg hover:shadow-xl transition-shadow duration-200",
+    secondary: "border-2 border-blue-600 text-blue-700 px-8 py-4 rounded-xl font-semibold text-lg hover:bg-blue-50 transition-colors duration-200",
+    cta: "bg-gradient-to-r from-blue-600 to-blue-700 text-white py-3 px-6 rounded-xl font-semibold text-lg shadow-lg hover:shadow-xl transition-shadow duration-200"
   },
   
-  // Animation variants
+  // Optimized animation variants for better performance
   animations: {
     containerVariants: {
       hidden: { opacity: 0 },
       visible: {
         opacity: 1,
         transition: {
-          staggerChildren: 0.2,
-          delayChildren: 0.3
+          staggerChildren: 0.1,
+          delayChildren: 0.1
         }
       }
     },
     
     itemVariants: {
-      hidden: { opacity: 0, y: 30 },
+      hidden: { opacity: 0, y: 20 },
       visible: {
         opacity: 1,
         y: 0,
         transition: {
-          duration: 0.6,
+          duration: 0.4,
           ease: [0.25, 0.46, 0.45, 0.94] as const
         }
       }
     },
     
     cardVariants: {
-      hidden: { opacity: 0, y: 50, scale: 0.9 },
+      hidden: { opacity: 0, y: 20 },
       visible: {
         opacity: 1,
         y: 0,
-        scale: 1,
         transition: {
-          duration: 0.6,
+          duration: 0.4,
           ease: [0.25, 0.46, 0.45, 0.94] as const
         }
       }

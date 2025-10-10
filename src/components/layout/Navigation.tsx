@@ -90,7 +90,7 @@ const Navigation = () => {
 
   return (
     <motion.nav
-      className="fixed top-0 w-full bg-white/95 backdrop-blur-md shadow-lg border-b border-gray-200 z-50"
+      className="fixed top-0 w-full bg-gradient-to-r from-white via-amber-50/30 to-white backdrop-blur-md shadow-lg border-b border-amber-200/50 z-50"
       initial={{ y: -100 }}
       animate={{ y: 0 }}
       transition={{ duration: 0.6, ease: [0.25, 0.46, 0.45, 0.94] }}
@@ -98,7 +98,7 @@ const Navigation = () => {
       <div className="container mx-auto px-4">
         <div className="flex justify-between items-center h-24 py-2">
                   <motion.div
-                    className="h-20 w-56 flex items-center justify-center -ml-4"
+                    className="h-20 w-64 flex items-center justify-center -ml-4"
                     whileHover={{ scale: 1.05 }}
                     transition={{ duration: 0.2 }}
                   >
@@ -118,8 +118,8 @@ const Navigation = () => {
                   key={item.id}
                   onClick={() => scrollToSection(item.id)}
                   className={`px-4 py-2 rounded-lg transition-all duration-300 font-medium ${activeSection === item.id
-                      ? 'bg-blue-600 text-white shadow-lg shadow-blue-600/25'
-                      : 'text-gray-700 hover:bg-blue-50 hover:text-blue-700'
+                      ? 'bg-gradient-to-r from-amber-500 to-amber-600 text-white shadow-lg shadow-amber-500/25'
+                      : 'text-gray-700 hover:bg-amber-50 hover:text-amber-700'
                     }`}
                   initial={{ opacity: 0, y: -20 }}
                   animate={{ opacity: 1, y: 0 }}
@@ -133,7 +133,7 @@ const Navigation = () => {
             </div>
 
             {/* Auth Buttons */}
-            <div className="flex items-center space-x-2 ml-4 pl-4 border-l border-gray-200">
+            <div className="flex items-center space-x-2 ml-4 pl-4 border-l border-amber-200">
               {isLoading ? (
                 <div className="w-6 h-6 border-2 border-gray-300 border-t-blue-600 rounded-full animate-spin" />
               ) : isAuthenticated ? (
@@ -150,8 +150,8 @@ const Navigation = () => {
                     whileHover={{ scale: 1.02 }}
                     whileTap={{ scale: 0.98 }}
                   >
-                    <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
-                      <User className="h-4 w-4 text-blue-600" />
+                    <div className="w-8 h-8 bg-gradient-to-r from-amber-100 to-amber-200 rounded-full flex items-center justify-center">
+                      <User className="h-4 w-4 text-amber-600" />
                     </div>
                     <span className="text-sm font-medium">
                       {user?.firstName} {user?.lastName}
@@ -175,7 +175,7 @@ const Navigation = () => {
                             {user?.firstName} {user?.lastName}
                           </p>
                           <p className="text-xs text-gray-500">{user?.email}</p>
-                          <span className="inline-block mt-1 px-2 py-1 text-xs font-medium bg-blue-100 text-blue-800 rounded-full">
+                          <span className="inline-block mt-1 px-2 py-1 text-xs font-medium bg-gradient-to-r from-amber-100 to-amber-200 text-amber-800 rounded-full">
                             {user?.role?.replace('_', ' ')}
                           </span>
                         </div>
@@ -185,7 +185,7 @@ const Navigation = () => {
                           <a
                             href="/dashboard"
                             onClick={closeUserDropdown}
-                            className="flex items-center space-x-3 px-4 py-2 text-sm text-gray-700 hover:bg-blue-50 hover:text-blue-700 transition-colors duration-200"
+                            className="flex items-center space-x-3 px-4 py-2 text-sm text-gray-700 hover:bg-amber-50 hover:text-amber-700 transition-colors duration-200"
                           >
                             <LayoutDashboard className="h-4 w-4" />
                             <span>Dashboard</span>
@@ -220,7 +220,7 @@ const Navigation = () => {
               ) : (
                 <motion.button
                   onClick={handleAuthClick}
-                  className="flex items-center space-x-1 px-4 py-2 bg-blue-600 text-white hover:bg-blue-700 rounded-lg transition-all duration-200 text-sm"
+                  className="flex items-center space-x-1 px-4 py-2 bg-gradient-to-r from-amber-500 to-amber-600 text-white hover:from-amber-600 hover:to-amber-700 rounded-lg transition-all duration-200 text-sm shadow-lg shadow-amber-500/25"
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
                   initial={{ opacity: 0, x: 20 }}
@@ -236,7 +236,7 @@ const Navigation = () => {
 
           {/* Mobile Menu Button */}
           <motion.button
-            className="md:hidden p-2 rounded-lg text-gray-700 hover:bg-blue-50 hover:text-blue-700 transition-colors"
+            className="md:hidden p-2 rounded-lg text-gray-700 hover:bg-amber-50 hover:text-amber-700 transition-colors"
             onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
             whileHover={{ scale: 1.1 }}
             whileTap={{ scale: 0.9 }}
@@ -274,8 +274,8 @@ const Navigation = () => {
                     key={item.id}
                     onClick={() => scrollToSection(item.id)}
                     className={`px-4 py-3 rounded-lg text-left transition-all duration-300 font-medium ${activeSection === item.id
-                        ? 'bg-blue-600 text-white shadow-lg shadow-blue-600/25'
-                        : 'text-gray-700 hover:bg-blue-50 hover:text-blue-700'
+                        ? 'bg-gradient-to-r from-amber-500 to-amber-600 text-white shadow-lg shadow-amber-500/25'
+                        : 'text-gray-700 hover:bg-amber-50 hover:text-amber-700'
                       }`}
                     initial={{ opacity: 0, x: -20 }}
                     animate={{ opacity: 1, x: 0 }}
@@ -298,8 +298,8 @@ const Navigation = () => {
                       transition={{ duration: 0.3, delay: navItems.length * 0.1 }}
                     >
                       <div className="flex items-center space-x-3">
-                        <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
-                          <User className="h-4 w-4 text-blue-600" />
+                        <div className="w-8 h-8 bg-gradient-to-r from-amber-100 to-amber-200 rounded-full flex items-center justify-center">
+                          <User className="h-4 w-4 text-amber-600" />
                         </div>
                         <div>
                           <p className="text-sm font-medium text-gray-900">
@@ -313,7 +313,7 @@ const Navigation = () => {
                     {/* Mobile Menu Items */}
                     <motion.a
                       href="/dashboard"
-                      className="flex items-center space-x-2 px-4 py-3 bg-blue-50 text-blue-700 rounded-lg transition-all duration-300 font-medium"
+                      className="flex items-center space-x-2 px-4 py-3 bg-gradient-to-r from-amber-50 to-amber-100 text-amber-700 rounded-lg transition-all duration-300 font-medium"
                       initial={{ opacity: 0, x: -20 }}
                       animate={{ opacity: 1, x: 0 }}
                       transition={{ duration: 0.3, delay: (navItems.length + 1) * 0.1 }}
@@ -353,7 +353,7 @@ const Navigation = () => {
                 ) : (
                   <motion.button
                     onClick={handleAuthClick}
-                    className="flex items-center space-x-2 px-4 py-3 bg-blue-600 text-white hover:bg-blue-700 rounded-lg transition-all duration-300 font-medium mt-4"
+                    className="flex items-center space-x-2 px-4 py-3 bg-gradient-to-r from-amber-500 to-amber-600 text-white hover:from-amber-600 hover:to-amber-700 rounded-lg transition-all duration-300 font-medium mt-4 shadow-lg shadow-amber-500/25"
                     initial={{ opacity: 0, x: -20 }}
                     animate={{ opacity: 1, x: 0 }}
                     transition={{ duration: 0.3, delay: navItems.length * 0.1 }}

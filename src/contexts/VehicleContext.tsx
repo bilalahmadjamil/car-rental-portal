@@ -1,6 +1,6 @@
 'use client';
 
-import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import { createContext, useContext, useState, useEffect, ReactNode, useCallback } from 'react';
 import { vehicleApi, Category, Subcategory, Vehicle, CreateCategoryDto, UpdateCategoryDto, CreateSubcategoryDto, UpdateSubcategoryDto, CreateVehicleDto, UpdateVehicleDto } from '../services/vehicleApi';
 
 // Types are now imported from vehicleApi.ts
@@ -42,7 +42,7 @@ interface VehicleContextType {
   // Data fetching
   fetchCategories: () => Promise<void>;
   fetchVehicles: (filters?: any) => Promise<void>;
-  refreshData: () => Promise<void>;
+  refreshData: (filters?: any) => Promise<void>;
 }
 
 const VehicleContext = createContext<VehicleContextType | undefined>(undefined);
@@ -61,7 +61,7 @@ export function VehicleProvider({ children }: { children: ReactNode }) {
 
 
   // Data fetching methods
-  const fetchCategories = async () => {
+  const fetchCategories = useCallback(async () => {
     setLoading(true);
     setError(null);
     try {
@@ -77,13 +77,15 @@ export function VehicleProvider({ children }: { children: ReactNode }) {
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
 
-  const fetchVehicles = async (filters?: any) => {
+  const fetchVehicles = useCallback(async (filters?: any) => {
     setLoading(true);
     setError(null);
     try {
-      const response = await vehicleApi.getVehicles(filters);
+      // If no filters provided, get all vehicles by setting a high limit
+      const apiFilters = filters || { limit: 100, isActive: true };
+      const response = await vehicleApi.getVehicles(apiFilters);
       if (response.success && response.data) {
         // Handle both old format (array) and new format (paginated object)
         if (Array.isArray(response.data)) {
@@ -102,11 +104,11 @@ export function VehicleProvider({ children }: { children: ReactNode }) {
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
 
-  const refreshData = async () => {
-    await Promise.all([fetchCategories(), fetchVehicles()]);
-  };
+  const refreshData = useCallback(async (filters?: any) => {
+    await Promise.all([fetchCategories(), fetchVehicles(filters)]);
+  }, [fetchCategories, fetchVehicles]);
 
   // Category actions
   const createCategory = async (categoryData: CreateCategoryDto) => {

@@ -2,7 +2,7 @@
 'use client';
 
 import { motion } from 'framer-motion';
-import { Car, Calendar, Wrench, Headphones, ArrowRight, CheckCircle, Star } from 'lucide-react';
+import { Car, Calendar, Wrench, Headphones, CheckCircle, Star } from 'lucide-react';
 import { services } from '@/data/mockData';
 import { designSystem, getSectionStyling } from '@/utils/designSystem';
 
@@ -126,21 +126,6 @@ const ServiceCard = ({ service, index }: { service: { id: string; title: string;
           ))}
         </motion.ul>
 
-        {/* Hover action indicator */}
-        <motion.div 
-          className="mt-6 flex items-center text-blue-600 font-medium opacity-0 group-hover:opacity-100 transition-all duration-300"
-          initial={{ opacity: 0, y: 10 }}
-          whileHover={{ opacity: 1, y: 0 }}
-        >
-          <span className="text-sm">Learn More</span>
-          <motion.div
-            className="ml-2"
-            animate={{ x: [0, 5, 0] }}
-            transition={{ duration: 1.5, repeat: Infinity }}
-          >
-            <ArrowRight className="w-4 h-4" />
-          </motion.div>
-        </motion.div>
       </div>
 
       {/* Decorative elements */}
@@ -154,19 +139,6 @@ const ServiceCard = ({ service, index }: { service: { id: string; title: string;
 const ServicesSection = () => {
   const styling = getSectionStyling('services');
   const { containerVariants, itemVariants } = designSystem.animations;
-  
-  const ctaVariants = {
-    hidden: { opacity: 0, y: 30, scale: 0.9 },
-    visible: {
-      opacity: 1,
-      y: 0,
-      scale: 1,
-      transition: {
-        duration: 0.6,
-        ease: [0.25, 0.46, 0.45, 0.94] as const
-      }
-    }
-  };
   
   return (
     <section id="services" className={`${styling.section} relative overflow-hidden`}>
@@ -269,89 +241,6 @@ const ServicesSection = () => {
           ))}
         </motion.div>
         
-        {/* Enhanced CTA section */}
-        <motion.div 
-          className="text-center"
-          variants={ctaVariants}
-          initial="hidden"
-          whileInView="visible"
-          viewport={{ once: true }}
-        >
-          <div className="relative bg-gradient-to-br from-blue-50 via-white to-purple-50 rounded-3xl p-12 shadow-2xl border border-blue-100 max-w-6xl mx-auto overflow-hidden">
-            {/* Happy Customers Background */}
-            <div className="absolute inset-0">
-              <div 
-                className="w-full h-full bg-cover bg-center bg-no-repeat opacity-15"
-                style={{
-                  backgroundImage: 'url(/happy-customers.png)',
-                  backgroundPosition: 'center left'
-                }}
-              />
-              <div className="absolute inset-0 bg-gradient-to-r from-blue-50/90 via-white/95 to-transparent"></div>
-            </div>
-            
-            {/* Background decoration */}
-            <div className="absolute top-0 right-0 w-32 h-32 bg-blue-200/20 rounded-full -translate-y-16 translate-x-16" />
-            <div className="absolute bottom-0 left-0 w-24 h-24 bg-purple-200/20 rounded-full translate-y-12 -translate-x-12" />
-            
-            <motion.div
-              className="relative z-10"
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6, delay: 0.3 }}
-            >
-              <motion.div 
-                className="inline-block mb-6"
-                animate={{ rotate: [0, 5, -5, 0] }}
-                transition={{ duration: 2, repeat: Infinity }}
-              >
-                <Star className="w-8 h-8 text-yellow-500" />
-              </motion.div>
-              
-              <h3 className="text-3xl font-bold text-gray-900 mb-4">
-                Join Our Happy Customers
-              </h3>
-              <p className="text-gray-600 mb-8 text-lg max-w-2xl mx-auto">
-                Experience the same satisfaction and joy that our customers feel. Contact us today to discuss 
-                your specific requirements and discover how we can help you with your automotive needs.
-              </p>
-              
-              <div className="flex flex-col sm:flex-row gap-4 justify-center">
-                <motion.button 
-                  className="group bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white px-8 py-4 rounded-xl font-semibold shadow-lg hover:shadow-xl transition-all duration-300 flex items-center justify-center"
-                  onClick={() => document.getElementById('contact')?.scrollIntoView({ behavior: 'smooth' })}
-                  whileHover={{ scale: 1.05, y: -2 }}
-                  whileTap={{ scale: 0.95 }}
-                >
-                  <span>Contact Us</span>
-                  <motion.div
-                    className="ml-2"
-                    animate={{ x: [0, 5, 0] }}
-                    transition={{ duration: 1.5, repeat: Infinity }}
-                  >
-                    <ArrowRight className="w-5 h-5" />
-                  </motion.div>
-                </motion.button>
-                
-                <motion.button 
-                  className="group border-2 border-blue-600 text-blue-700 hover:bg-blue-50 px-8 py-4 rounded-xl font-semibold transition-all duration-300 flex items-center justify-center"
-                  onClick={() => document.getElementById('vehicles')?.scrollIntoView({ behavior: 'smooth' })}
-                  whileHover={{ scale: 1.05, y: -2 }}
-                  whileTap={{ scale: 0.95 }}
-                >
-                  <span>View Vehicles</span>
-                  <motion.div
-                    className="ml-2"
-                    animate={{ rotate: [0, 360] }}
-                    transition={{ duration: 2, repeat: Infinity }}
-                  >
-                    <Car className="w-5 h-5" />
-                  </motion.div>
-                </motion.button>
-              </div>
-            </motion.div>
-        </div>
-        </motion.div>
       </div>
     </section>
   );

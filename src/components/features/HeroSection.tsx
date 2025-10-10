@@ -1,15 +1,67 @@
 // src/components/features/HeroSection.tsx
 'use client';
 
-import { ChevronDown } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { ChevronDown, Calendar, Search } from 'lucide-react';
 import { motion } from 'framer-motion';
 
 const HeroSection = () => {
+  const [fromDate, setFromDate] = useState('');
+  const [toDate, setToDate] = useState('');
+
+  // Sync with filter section dates for bidirectional communication
+  useEffect(() => {
+    const loadDatesFromStorage = () => {
+      const storedFromDate = localStorage.getItem('searchFromDate');
+      const storedToDate = localStorage.getItem('searchToDate');
+      
+      // Set dates from localStorage or clear if not found
+      setFromDate(storedFromDate || '');
+      setToDate(storedToDate || '');
+    };
+
+    // Load dates on mount
+    loadDatesFromStorage();
+
+    // Listen for date updates from filter section
+    const handleDateUpdate = () => {
+      loadDatesFromStorage();
+    };
+
+    window.addEventListener('dateFilterUpdated', handleDateUpdate);
+
+    return () => {
+      window.removeEventListener('dateFilterUpdated', handleDateUpdate);
+    };
+  }, []);
+
   const scrollToVehicles = () => {
     const element = document.getElementById('vehicles');
     if (element) {
       element.scrollIntoView({ behavior: 'smooth' });
     }
+  };
+
+  // Handle date search and sync with filter section
+  const handleDateSearch = () => {
+    if (fromDate && toDate) {
+      // Calculate days between dates
+      const from = new Date(fromDate);
+      const to = new Date(toDate);
+      const timeDiff = to.getTime() - from.getTime();
+      const daysDiff = Math.ceil(timeDiff / (1000 * 3600 * 24));
+      
+      // Store dates in localStorage for persistence
+      localStorage.setItem('searchFromDate', fromDate);
+      localStorage.setItem('searchToDate', toDate);
+      localStorage.setItem('rentalDays', daysDiff.toString());
+      
+      // Notify filter section of changes
+      window.dispatchEvent(new CustomEvent('dateFilterUpdated'));
+    }
+    
+    // Scroll to vehicles section
+    scrollToVehicles();
   };
 
   const containerVariants = {
@@ -29,7 +81,7 @@ const HeroSection = () => {
       opacity: 1,
       y: 0,
       transition: {
-        duration: 0.6,
+        duration: 0.4,
         ease: [0.25, 0.46, 0.45, 0.94] as const
       }
     }
@@ -51,6 +103,8 @@ const HeroSection = () => {
         <div className="absolute inset-0 bg-black/40"></div>
         {/* Gradient Overlay for elegant transition */}
         <div className="absolute inset-0 bg-gradient-to-br from-blue-900/30 via-transparent to-blue-800/20"></div>
+        {/* Bottom gradient for smooth transition to next section */}
+        <div className="absolute bottom-0 left-0 right-0 h-32 bg-gradient-to-t from-white/90 via-white/50 to-transparent"></div>
         {/* Subtle pattern overlay */}
         <div className="absolute inset-0 opacity-30" style={{
           backgroundImage: `url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.05'%3E%3Ccircle cx='30' cy='30' r='1'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")`
@@ -78,10 +132,10 @@ const HeroSection = () => {
             opacity: [0.3, 0.7, 0.3]
           }}
           transition={{ 
-            duration: 5,
+            duration: 3,
             repeat: Infinity,
             ease: "easeInOut",
-            delay: 1
+            delay: 0.5
           }}
         />
         <motion.div 
@@ -99,78 +153,109 @@ const HeroSection = () => {
         />
       </div>
 
-      <div className="container mx-auto px-4 py-20 relative z-10">
-        <motion.div 
-          className="text-center mb-16 max-w-6xl mx-auto"
-          variants={containerVariants}
-          initial="hidden"
-          animate="visible"
-        >
-          <motion.h1 
-            className="text-5xl md:text-7xl lg:text-8xl font-bold mb-6 leading-tight"
-            variants={itemVariants}
-          >
-            <span className="bg-gradient-to-r from-white via-blue-100 to-blue-200 bg-clip-text text-transparent drop-shadow-2xl">
-              Premium Car Rental
-            </span>
-            <br />
-            <span className="text-white drop-shadow-2xl">& Car Sales</span>
-          </motion.h1>
-          
-          <motion.p 
-            className="text-xl md:text-2xl text-white/90 mb-10 max-w-4xl mx-auto leading-relaxed drop-shadow-lg"
-            variants={itemVariants}
-          >
-            Experience luxury and reliability with our premium vehicle fleet. 
-            From daily rentals to long-term leases, or purchase your dream car - we have the perfect solution for your needs.
-          </motion.p>
-          
+      <div className="container mx-auto px-4 py-12 md:py-20 pb-16 relative z-10">
+        <div className="max-w-7xl mx-auto">
+          {/* Main Content */}
           <motion.div 
-            className="flex flex-col sm:flex-row gap-6 justify-center"
-            variants={itemVariants}
+            className="text-center mb-12 md:mb-16"
+            variants={containerVariants}
+            initial="hidden"
+            animate="visible"
           >
-            <motion.button 
-              onClick={scrollToVehicles}
-              className="group relative bg-gradient-to-r from-blue-600 to-blue-700 text-white px-10 py-4 rounded-xl text-lg font-semibold shadow-2xl shadow-blue-600/50 hover:shadow-blue-600/70 transition-all duration-300 hover:scale-105 backdrop-blur-sm"
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
+            <motion.h1 
+              className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold mb-4 md:mb-6 leading-tight"
+              variants={itemVariants}
             >
-              <span className="relative z-10">Browse Vehicles</span>
-              <div className="absolute inset-0 bg-gradient-to-r from-blue-700 to-blue-800 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-            </motion.button>
+              <span className="bg-gradient-to-r from-white via-blue-100 to-blue-200 bg-clip-text text-transparent drop-shadow-2xl">
+                Premium Car Rental
+              </span>
+              <br />
+              <span className="text-white drop-shadow-2xl">& Car Sales</span>
+            </motion.h1>
             
-            <motion.button 
-              onClick={() => {
-                const vehiclesSection = document.getElementById('vehicles');
-                if (vehiclesSection) {
-                  vehiclesSection.scrollIntoView({ behavior: 'smooth' });
-                  // Trigger the sale tab after a short delay
-                  setTimeout(() => {
-                    const saleTab = document.querySelector('[data-tab="sale"]') as HTMLButtonElement;
-                    if (saleTab) saleTab.click();
-                  }, 500);
-                }
-              }}
-              className="group border-2 border-white/80 text-white px-10 py-4 rounded-xl text-lg font-semibold hover:bg-white/10 hover:border-white transition-all duration-300 hover:scale-105 backdrop-blur-sm shadow-lg"
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
+            <motion.p 
+              className="text-lg sm:text-xl md:text-2xl text-white/90 mb-8 md:mb-12 max-w-3xl mx-auto leading-relaxed drop-shadow-lg"
+              variants={itemVariants}
             >
-              View Cars for Sale
-            </motion.button>
+              Drive Smart — Quality Cars for Every Budget
+            </motion.p>
           </motion.div>
-        </motion.div>
-        
+          
+          {/* Date Filter Section */}
+          <motion.div 
+            className="max-w-5xl mx-auto"
+            variants={containerVariants}
+            initial="hidden"
+            animate="visible"
+          >
+            <motion.div 
+              className="bg-white/10 backdrop-blur-md rounded-2xl p-6 md:p-8 border border-white/20 shadow-2xl"
+              variants={itemVariants}
+            >
+              <div className="text-center mb-6">
+                <h3 className="text-xl md:text-2xl font-bold text-white mb-2">Find Available Cars</h3>
+                <p className="text-white/80 text-sm md:text-base">Select your dates to see available vehicles</p>
+              </div>
+              
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 items-end">
+                <div className="sm:col-span-1">
+                  <label className="block text-white/90 text-sm font-medium mb-2">
+                    <Calendar className="w-4 h-4 inline mr-1" />
+                    From Date
+                  </label>
+                  <input
+                    type="date"
+                    value={fromDate}
+                    onChange={(e) => setFromDate(e.target.value)}
+                    min={new Date().toISOString().split('T')[0]}
+                    className="w-full px-4 py-3 rounded-xl bg-white/20 border border-white/30 text-white placeholder-white/60 focus:ring-2 focus:ring-blue-400 focus:border-transparent backdrop-blur-sm transition-colors duration-200"
+                    placeholder="Select start date"
+                  />
+                </div>
+                
+                <div className="sm:col-span-1">
+                  <label className="block text-white/90 text-sm font-medium mb-2">
+                    <Calendar className="w-4 h-4 inline mr-1" />
+                    To Date
+                  </label>
+                  <input
+                    type="date"
+                    value={toDate}
+                    onChange={(e) => setToDate(e.target.value)}
+                    min={fromDate || new Date().toISOString().split('T')[0]}
+                    className="w-full px-4 py-3 rounded-xl bg-white/20 border border-white/30 text-white placeholder-white/60 focus:ring-2 focus:ring-blue-400 focus:border-transparent backdrop-blur-sm transition-colors duration-200"
+                    placeholder="Select end date"
+                  />
+                </div>
+                
+                <div className="sm:col-span-2 lg:col-span-1">
+                  <motion.button
+                    onClick={handleDateSearch}
+                    disabled={!fromDate || !toDate}
+                    className="w-full bg-gradient-to-r from-blue-600 to-blue-700 text-white px-6 py-3 rounded-xl font-semibold hover:from-blue-700 hover:to-blue-800 transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 shadow-lg text-sm md:text-base"
+                    whileHover={{ scale: fromDate && toDate ? 1.02 : 1 }}
+                    whileTap={{ scale: fromDate && toDate ? 0.98 : 1 }}
+                  >
+                    <Search className="w-4 h-4 md:w-5 md:h-5" />
+                    <span className="hidden sm:inline">Search Cars</span>
+                    <span className="sm:hidden">Search</span>
+                  </motion.button>
+                </div>
+              </div>
+            </motion.div>
+          </motion.div>
+        </div>
 
         {/* Scroll Indicator */}
         <motion.div 
           className="absolute bottom-8 left-1/2 transform -translate-x-1/2"
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 1, duration: 0.6 }}
+          transition={{ delay: 0.5, duration: 0.4 }}
         >
           <motion.button 
             onClick={scrollToVehicles}
-            className="group p-4 rounded-full bg-white/20 backdrop-blur-md border border-white/30 shadow-2xl hover:shadow-white/20 transition-all duration-300"
+            className="group p-4 rounded-full bg-white/20 backdrop-blur-md border border-white/30 shadow-2xl hover:shadow-white/20 transition-colors duration-200"
             whileHover={{ scale: 1.1 }}
             animate={{ y: [0, -10, 0] }}
             transition={{ 
