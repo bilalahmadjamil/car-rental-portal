@@ -73,10 +73,10 @@ const BookingManagement = () => {
       setLoading(true);
       if (activeTab === 'rentals') {
         const response = await apiClient.get('/bookings/admin/rentals');
-        setRentals(response.data.rentals);
+        setRentals((response.data as any).rentals);
       } else {
         const response = await apiClient.get('/bookings/admin/sales');
-        setSales(response.data.sales);
+        setSales((response.data as any).sales);
       }
     } catch (err) {
       setError('Failed to fetch data');
